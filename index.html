@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revision Bhai's Notes and FlowChart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #ffffff; --surface: #f8fafc; --surface2: #f1f5f9;
+  --border: rgba(0,0,0,0.08); --border-hover: rgba(0,0,0,0.16);
+  --accent: #2563eb; --accent2: #7c3aed;
+  --text: #1e293b; --text-dim: #64748b; --text-muted: #94a3b8;
+  --green: #10b981; --orange: #f59e0b; --pink: #ec4899; --blue: #3b82f6;
+  --red: #ef4444; --cyan: #06b6d4; --purple: #8b5cf6;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+body { font-family:'Inter',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); height:100vh; overflow:hidden; display:flex; flex-direction:column; -webkit-font-smoothing:antialiased; }
+
+/* ===== HEADER ===== */
+header { display:flex; align-items:center; gap:12px; padding:0 20px; height:52px; min-height:52px; background:#1e1b4b; border-bottom:1px solid rgba(255,255,255,0.06); z-index:100; }
+.logo { display:flex; align-items:center; gap:10px; margin-right:8px; }
+.logo-icon { width:28px; height:28px; background:linear-gradient(135deg,#818cf8,#c084fc); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; color:#fff; }
+.logo h1 { font-size:15px; font-weight:700; color:#e0e7ff; letter-spacing:-0.3px; white-space:nowrap; }
+.toolbar-sep { width:1px; height:24px; background:rgba(255,255,255,0.1); flex-shrink:0; }
+.toolbar-group { display:flex; gap:2px; align-items:center; }
+.tb { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:34px; padding:0 12px; border:1px solid transparent; border-radius:var(--radius-sm); background:transparent; color:rgba(224,231,255,0.6); cursor:pointer; font:500 12px/1 'Inter',system-ui,sans-serif; transition:all var(--transition); white-space:nowrap; }
+.tb:hover { background:rgba(255,255,255,0.08); color:#e0e7ff; border-color:rgba(255,255,255,0.12); }
+.tb:active { transform:scale(0.97); }
+.tb svg { width:15px; height:15px; flex-shrink:0; }
+.tb.tb-accent { color:#a5b4fc; }
+.tb.tb-accent:hover { background:rgba(165,180,252,0.12); border-color:rgba(165,180,252,0.2); }
+.spacer { flex:1; }
+
+/* ===== PALETTE ===== */
+.palette { width:232px; background:#1e1b4b; border-right:none; padding:16px 14px; display:flex; flex-direction:column; gap:4px; overflow-y:auto; position:fixed; top:52px; left:0; bottom:0; z-index:150; transition:transform .3s cubic-bezier(0.4,0,0.2,1); }
+.palette.collapsed { transform:translateX(-100%); }
+.palette h3 { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:rgba(165,180,252,0.5); margin:14px 0 6px 4px; font-weight:600; }
+.palette h3:first-child { margin-top:2px; }
+.palette-item { display:flex; align-items:center; gap:10px; padding:8px 10px; background:transparent; border:1px solid transparent; border-radius:var(--radius-md); cursor:grab; transition:all var(--transition); user-select:none; }
+.palette-item:hover { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.08); }
+.palette-item:active { cursor:grabbing; transform:scale(0.97); }
+.palette-item .icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:8px; flex-shrink:0; }
+.palette-item .icon svg { width:18px; height:18px; }
+.palette-item span { font-size:12px; font-weight:500; color:rgba(224,231,255,0.6); }
+.palette-item:hover span { color:#e0e7ff; }
+
+/* ===== PROPS ===== */
+.props-section { margin-top:12px; display:none; flex-direction:column; gap:8px; }
+.props-section.visible { display:flex; }
+.prop-row { display:flex; align-items:center; gap:8px; }
+.prop-row label { font-size:11px; color:rgba(165,180,252,0.5); min-width:50px; }
+.prop-row input[type="color"] { width:32px; height:26px; border:1px solid rgba(255,255,255,0.1); border-radius:var(--radius-sm); background:rgba(255,255,255,0.06); cursor:pointer; padding:2px; }
+.prop-row input[type="range"] { flex:1; height:4px; accent-color:#818cf8; cursor:pointer; }
+.prop-row .size-val { font-size:11px; color:#e0e7ff; min-width:28px; text-align:right; }
+.color-swatches { display:flex; gap:4px; flex-wrap:wrap; }
+.color-swatch { width:20px; height:20px; border-radius:5px; cursor:pointer; border:2px solid transparent; transition:all .15s; }
+.color-swatch:hover { border-color:rgba(255,255,255,0.6); transform:scale(1.15); }
+
+/* ===== CANVAS ===== */
+.main { display:flex; flex:1; overflow:hidden; }
+.canvas-wrap { flex:1; position:relative; overflow:auto; background:#fafafa; }
+.canvas-wrap::before { content:''; position:absolute; inset:0; background-image:radial-gradient(circle,rgba(0,0,0,0.06) 1px,transparent 1px); background-size:24px 24px; opacity:.5; pointer-events:none; z-index:0; }
+#canvas { position:relative; transform-origin:0 0; min-width:100%; min-height:100%; }
+svg#connections { position:absolute; top:0; left:0; pointer-events:none; z-index:1; }
+
+/* ===== ZOOM ===== */
+.zoom-controls { position:fixed; bottom:16px; left:16px; z-index:150; display:flex; gap:2px; align-items:center; background:#ffffff; border:1px solid var(--border); border-radius:var(--radius-md); padding:4px 6px; box-shadow:var(--shadow-md); }
+.zoom-controls button { width:30px; height:30px; border:none; border-radius:var(--radius-sm); background:transparent; color:var(--text-dim); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:all var(--transition); }
+.zoom-controls button:hover { background:rgba(0,0,0,0.05); color:var(--text); }
+.zoom-level { font-size:11px; color:var(--text-dim); min-width:40px; text-align:center; user-select:none; font-weight:500; }
+
+/* ===== SHAPES ===== */
+.shape { position:absolute; display:flex; align-items:center; justify-content:center; cursor:move; z-index:10; transition:filter .2s,box-shadow .2s,z-index .2s,outline .2s,outline-offset .2s; animation:shapeIn .35s cubic-bezier(.34,1.56,.64,1); }
+@keyframes shapeIn { from { opacity:0; transform:scale(.9) translateY(-6px); } to { opacity:1; transform:scale(1) translateY(0); } }
+.shape:hover { z-index:20; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.1)); }
+.shape.selected { outline:2px solid var(--accent); outline-offset:4px; box-shadow:0 0 0 1px rgba(37,99,235,0.1) inset; z-index:25; }
+.shape .label { font-size:13px; font-weight:600; text-align:center; padding:8px 16px; outline:none; width:100%; background:transparent; border:none; cursor:text; }
+
+/* Shape types */
+.shape-rect { background:#eff6ff; border:2px solid #3b82f6; border-radius:var(--radius-lg); color:#1e3a5f; box-shadow:0 1px 3px rgba(59,130,246,0.12); }
+.shape-rounded { background:#ecfdf5; border:2px solid #10b981; border-radius:32px; color:#14532d; box-shadow:0 1px 3px rgba(16,185,129,0.12); }
+.shape-diamond { background:#fffbeb; border:2px solid #f59e0b; transform:rotate(45deg); border-radius:8px; color:#78350f; box-shadow:0 1px 3px rgba(245,158,11,0.12); }
+.shape-diamond .label { transform:rotate(-45deg); }
+.shape-circle { background:#fdf2f8; border:2px solid #ec4899; border-radius:50%; color:#831843; box-shadow:0 1px 3px rgba(236,72,153,0.12); }
+.shape-parallelogram { background:#ecfeff; border:2px solid #06b6d4; border-radius:8px; transform:skewX(-10deg); color:#164e63; box-shadow:0 1px 3px rgba(6,182,212,0.12); }
+.shape-parallelogram .label { transform:skewX(10deg); }
+.shape-hexagon { background:#f5f3ff; border:2px solid #8b5cf6; border-radius:6px; color:#3b0764; clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%); }
+.shape-cylinder { background:#fef2f2; border:2px solid #ef4444; border-radius:50%/15%; color:#7f1d1d; box-shadow:0 1px 3px rgba(239,68,68,0.12); }
+
+/* Notes Box */
+.shape-notesbox { background:#faf5ff; border:1.5px solid rgba(139,92,246,0.35); border-radius:var(--radius-lg); color:var(--text); box-shadow:0 1px 3px rgba(139,92,246,0.1); display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; padding:0; }
+.shape-notesbox .nb-header { padding:10px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(139,92,246,0.12); min-height:50px; cursor:move; }
+.shape-notesbox .nb-header .label { flex:1; padding:4px 8px; font-size:13px; font-weight:600; }
+.shape-notesbox .nb-toggle { width:26px; height:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:var(--radius-sm); transition:all .2s; flex-shrink:0; margin-left:6px; background:rgba(139,92,246,0.06); border:1px solid rgba(139,92,246,0.15); color:#8b5cf6; }
+.shape-notesbox .nb-toggle:hover { background:rgba(139,92,246,0.12); }
+.shape-notesbox .nb-toggle svg { width:14px; height:14px; transition:transform .3s; }
+.shape-notesbox.collapsed .nb-toggle svg { transform:rotate(-90deg); }
+.shape-notesbox.collapsed .nb-header { border-bottom:none; }
+.shape-notesbox .nb-notes { padding:8px 12px 12px; display:flex; flex-direction:column; gap:4px; border-top:none; }
+.shape-notesbox.collapsed .nb-notes { display:none; }
+
+/* Image shape */
+.shape-image { background:transparent; border:none; border-radius:0; padding:0; overflow:visible; box-shadow:none; }
+.shape-image img { width:100%; height:100%; object-fit:contain; pointer-events:none; display:block; border-radius:4px; }
+.shape-image:hover { filter:drop-shadow(0 4px 12px rgba(0,0,0,0.1)); }
+.shape-image.selected { outline-offset:6px; }
+
+/* Note items */
+.note-item { display:flex; align-items:flex-start; gap:8px; padding:4px 6px; border-radius:var(--radius-sm); transition:background .2s; }
+.note-item:hover { background:rgba(124,58,237,0.04); }
+.note-bullet { color:#7c3aed; font-size:14px; line-height:1.6; flex-shrink:0; user-select:none; margin-top:1px; }
+.note-text-input { flex:1; font-size:13px; color:#334155; background:none; border:none; outline:none; font-family:'Inter',system-ui,-apple-system,sans-serif; padding:2px 0; resize:none; overflow:hidden; line-height:1.5; min-height:20px; white-space:pre-wrap; word-break:break-word; }
+.note-text-input:empty::before { content:attr(data-placeholder); color:rgba(148,163,184,0.6); font-style:italic; pointer-events:none; }
+
+/* Format bar */
+.nb-format-bar { position:fixed; z-index:300; display:none; align-items:center; gap:4px; background:#ffffff; border:1px solid var(--border-hover); border-radius:var(--radius-md); padding:5px 8px; box-shadow:var(--shadow-lg); animation:shapeIn .2s ease; }
+.nb-format-bar.visible { display:flex; }
+.nb-format-bar label { font-size:10px; color:var(--text-dim); margin-right:2px; }
+.nb-format-bar select { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-size:11px; padding:3px 6px; cursor:pointer; outline:none; font-family:'Inter',system-ui,sans-serif; }
+.nb-format-bar select:hover { border-color:var(--border-hover); }
+.nb-format-bar input[type="color"] { width:24px; height:24px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface2); cursor:pointer; padding:2px; }
+.nb-format-bar .fmt-swatch { width:18px; height:18px; border-radius:4px; cursor:pointer; border:1.5px solid transparent; transition:all .15s; }
+.nb-format-bar .fmt-swatch:hover { border-color:var(--text); transform:scale(1.2); }
+.note-del { width:18px; height:18px; border:none; border-radius:4px; background:transparent; color:#ef4444; cursor:pointer; font-size:14px; font-weight:bold; display:flex; align-items:center; justify-content:center; opacity:0; transition:all .2s; flex-shrink:0; }
+.note-item:hover .note-del { opacity:.5; }
+.note-del:hover { opacity:1; background:rgba(239,68,68,0.1); }
+
+/* Lines */
+.line-shape { position:absolute; z-index:5; pointer-events:none; animation:shapeIn .35s cubic-bezier(.34,1.56,.64,1); }
+.line-shape svg { overflow:visible; }
+.line-shape.selected svg line,.line-shape.selected svg path { filter:drop-shadow(0 0 4px rgba(37,99,235,0.4)); }
+.line-endpoint { position:absolute; width:14px; height:14px; background:var(--accent); border:2px solid #fff; border-radius:50%; cursor:move; z-index:30; opacity:0; transition:opacity .2s; pointer-events:all; }
+.line-shape:hover .line-endpoint,.line-shape.selected .line-endpoint { opacity:1; }
+.line-endpoint.snapped { opacity:0!important; pointer-events:none!important; }
+.line-shape.selected .line-endpoint.snapped { opacity:.5!important; pointer-events:all!important; }
+.line-endpoint:hover { background:var(--green); transform:scale(1.2); }
+.port.snap-highlight { opacity:1; background:var(--green); transform:scale(1.5); box-shadow:0 0 8px var(--green); }
+
+/* Resize handles */
+.resize-handle { position:absolute; width:10px; height:10px; background:var(--accent); border:2px solid #fff; border-radius:3px; z-index:40; opacity:0; transition:opacity .15s; pointer-events:all; }
+.shape.selected .resize-handle { opacity:1; }
+.resize-handle:hover { background:var(--green); }
+.rh-tl{top:-5px;left:-5px;cursor:nw-resize}.rh-tr{top:-5px;right:-5px;cursor:ne-resize}.rh-bl{bottom:-5px;left:-5px;cursor:sw-resize}.rh-br{bottom:-5px;right:-5px;cursor:se-resize}
+.rh-t{top:-5px;left:50%;margin-left:-5px;cursor:n-resize}.rh-b{bottom:-5px;left:50%;margin-left:-5px;cursor:s-resize}.rh-l{left:-5px;top:50%;margin-top:-5px;cursor:w-resize}.rh-r{right:-5px;top:50%;margin-top:-5px;cursor:e-resize}
+
+/* Ports */
+.port { position:absolute; width:12px; height:12px; background:var(--accent); border:2px solid #fff; border-radius:50%; cursor:crosshair; z-index:30; opacity:0; transition:opacity .2s,transform .2s; pointer-events:all; }
+.shape:hover .port,.shape.selected .port { opacity:1; }
+.port:hover { transform:scale(1.4); background:var(--green); }
+.port-top{top:-6px;left:50%;margin-left:-6px}.port-bottom{bottom:-6px;left:50%;margin-left:-6px}.port-left{left:-6px;top:50%;margin-top:-6px}.port-right{right:-6px;top:50%;margin-top:-6px}
+
+/* Code panel */
+.code-panel { position:fixed; top:52px; right:0; bottom:0; width:380px; background:var(--surface); border-left:1px solid var(--border); display:flex; flex-direction:column; transform:translateX(0); transition:transform .3s cubic-bezier(0.4,0,0.2,1); z-index:200; backdrop-filter:blur(16px); }
+.code-panel.collapsed { transform:translateX(100%); }
+.code-panel-header { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+.code-panel-header h3 { font-size:13px; font-weight:600; color:var(--text-dim); flex:1; }
+.code-panel-header button { padding:4px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:transparent; color:var(--text-dim); cursor:pointer; font-size:12px; transition:all .2s; }
+.code-panel-header button:hover { border-color:var(--border-hover); color:var(--text); }
+#codeOutput { flex:1; padding:16px; font-family:'SF Mono','Fira Code','Consolas',monospace; font-size:12px; line-height:1.6; color:#7c3aed; background:#fafafa; border:none; resize:none; outline:none; overflow-y:auto; white-space:pre; tab-size:2; }
+
+/* Toast */
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:#ffffff; border:1px solid var(--border-hover); color:var(--text); padding:10px 20px; border-radius:var(--radius-md); font-size:12px; font-weight:500; z-index:9999; transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s; pointer-events:none; box-shadow:var(--shadow-lg); opacity:0; }
+.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+/* Presentation mode */
+body.presentation-mode header{display:none}body.presentation-mode .palette{display:none}body.presentation-mode .zoom-controls{display:flex}body.presentation-mode .delete-hint{display:none}body.presentation-mode .shape{cursor:default}body.presentation-mode .port{display:none}body.presentation-mode .resize-handle{display:none}body.presentation-mode .note-del{display:none}body.presentation-mode .note-link-btn{display:none}body.presentation-mode .note-text-input{pointer-events:none}body.presentation-mode .line-endpoint{display:none}body.presentation-mode .nb-header{cursor:default}body.presentation-mode .nb-header .label{pointer-events:none}body.presentation-mode .nb-format-bar{display:none}body.presentation-mode .canvas-wrap{top:0}
+
+/* Note link button */
+.note-link-btn { width:18px; height:18px; border:none; border-radius:4px; background:transparent; color:#7c3aed; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; opacity:0; transition:all .2s; flex-shrink:0; padding:0; }
+.note-item:hover .note-link-btn { opacity:.5; }
+.note-link-btn:hover { opacity:1; background:rgba(124,58,237,0.08); }
+.note-link-btn.has-links { opacity:.7; color:#10b981; }
+.note-link-btn.linking-active { opacity:1; color:#fbbf24; background:rgba(251,191,36,0.1); animation:linkPulse 1s infinite; }
+@keyframes linkPulse { 0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0.2)}50%{box-shadow:0 0 0 4px rgba(251,191,36,0)} }
+.note-link-line { pointer-events:none; }
+
+/* Locked canvas */
+body.canvas-locked .shape-image.note-linked{display:none}body.canvas-locked .shape-image.note-linked.note-visible{display:flex}body.canvas-locked .port{display:none}body.canvas-locked .resize-handle{display:none}body.canvas-locked .line-endpoint{display:none}body.canvas-locked .note-del{display:none}body.canvas-locked .note-link-btn{display:none}body.canvas-locked .note-text-input{pointer-events:none}body.canvas-locked .nb-header .label{pointer-events:none}body.canvas-locked .note-item{cursor:pointer;user-select:none}body.canvas-locked .note-item.has-note-link{position:relative}body.canvas-locked .note-item.has-note-link:hover{background:rgba(16,185,129,0.06)}
+.lock-btn-active { background:rgba(251,191,36,0.15)!important; border-color:rgba(251,191,36,0.25)!important; color:#fbbf24!important; }
+body.note-linking-mode .shape-image { cursor:crosshair; outline:2px dashed rgba(251,191,36,0.4); outline-offset:4px; }
+body.note-linking-mode .shape-image:hover { outline-color:#fbbf24; }
+
+.delete-hint { position:fixed; bottom:24px; right:24px; font-size:11px; color:var(--text-muted); z-index:50; opacity:0; transition:opacity .2s; }
+.delete-hint.visible { opacity:1; }
+.delete-hint kbd { display:inline-block; padding:2px 6px; background:var(--surface2); border:1px solid var(--border); border-radius:4px; font-family:'Inter',system-ui,sans-serif; font-size:10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <h1>Revision Bhai</h1>
+  </div>
+  <div class="toolbar-sep"></div>
+  <div class="toolbar-group">
+    <button class="tb" onclick="togglePalette()" title="Toggle shapes panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Shapes</button>
+  </div>
+  <div class="toolbar-sep"></div>
+  <div class="toolbar-group">
+    <button class="tb" onclick="undoAction()" title="Undo (Ctrl+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+    <button class="tb" onclick="clearCanvas()" title="Clear canvas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+  </div>
+  <div class="toolbar-sep"></div>
+  <div class="toolbar-group">
+    <button class="tb" onclick="expandAllNotes()" title="Expand all notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg></button>
+    <button class="tb" onclick="collapseAllNotes()" title="Collapse all notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg></button>
+    <button class="tb" id="lockBtn" onclick="toggleCanvasLock()" title="Lock/unlock canvas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></button>
+  </div>
+  <span class="spacer"></span>
+  <div class="toolbar-group">
+    <button class="tb" onclick="downloadCanvasImage()" title="Download as image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+    <button class="tb" onclick="saveProject()" title="Save project"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+    <button class="tb" onclick="document.getElementById('loadFileInput').click()" title="Load project"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
+    <input type="file" id="loadFileInput" accept=".json" style="display:none" onchange="loadProject(event)">
+  </div>
+  <div class="toolbar-sep"></div>
+  <button class="tb tb-accent" onclick="enterPresentation()" title="Presentation mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Present</button>
+</header>
+
+<div class="main">
+  <div class="palette" id="palette">
+    <h3>Shapes</h3>
+    <div class="palette-item" draggable="true" data-type="rect">
+      <div class="icon" style="background:rgba(59,130,246,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="3"/></svg></div>
+      <span>Process</span>
+    </div>
+    <div class="palette-item" draggable="true" data-type="rounded">
+      <div class="icon" style="background:rgba(16,185,129,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="6"/></svg></div>
+      <span>Start / End</span>
+    </div>
+    <div class="palette-item" draggable="true" data-type="diamond">
+      <div class="icon" style="background:rgba(245,158,11,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><polygon points="12,2 22,12 12,22 2,12"/></svg></div>
+      <span>Decision</span>
+    </div>
+    <div class="palette-item" draggable="true" data-type="circle">
+      <div class="icon" style="background:rgba(236,72,153,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg></div>
+      <span>Connector</span>
+    </div>
+    <div class="palette-item" draggable="true" data-type="parallelogram">
+      <div class="icon" style="background:rgba(6,182,212,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2"><polygon points="6,5 22,5 18,19 2,19"/></svg></div>
+      <span>Input / Output</span>
+    </div>
+    <div class="palette-item" draggable="true" data-type="hexagon">
+      <div class="icon" style="background:rgba(139,92,246,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><polygon points="12,2 21,7 21,17 12,22 3,17 3,7"/></svg></div>
+      <span>Preparation</span>
+    </div>
+    <div class="palette-item" draggable="true" data-type="cylinder">
+      <div class="icon" style="background:rgba(239,68,68,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><line x1="4" y1="6" x2="4" y2="18"/><line x1="20" y1="6" x2="20" y2="18"/><ellipse cx="12" cy="18" rx="8" ry="3"/></svg></div>
+      <span>Database</span>
+    </div>
+    <div class="palette-item" draggable="true" data-type="notesbox">
+      <div class="icon" style="background:rgba(139,92,246,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="17" y2="17"/></svg></div>
+      <span>Notes Box</span>
+    </div>
+
+    <h3>Lines</h3>
+    <div class="palette-item" draggable="true" data-type="line-straight">
+      <div class="icon" style="background:rgba(59,130,246,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><line x1="3" y1="20" x2="21" y2="4"/></svg></div>
+      <span>Straight Line</span>
+    </div>
+    <div class="palette-item" draggable="true" data-type="line-curved">
+      <div class="icon" style="background:rgba(16,185,129,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M3,20 C3,8 21,16 21,4"/></svg></div>
+      <span>Curved Line</span>
+    </div>
+    <div class="palette-item" draggable="true" data-type="line-dotted">
+      <div class="icon" style="background:rgba(245,158,11,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="3,3"><line x1="3" y1="20" x2="21" y2="4"/></svg></div>
+      <span>Dotted Line</span>
+    </div>
+    <div class="palette-item" draggable="true" data-type="line-dashed">
+      <div class="icon" style="background:rgba(236,72,153,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-dasharray="6,4"><line x1="3" y1="20" x2="21" y2="4"/></svg></div>
+      <span>Dashed Line</span>
+    </div>
+
+    <h3>Style</h3>
+    <div class="props-section visible" id="propsSection">
+      <p style="font-size:11px;color:rgba(165,180,252,0.5)">Select a shape to style it</p>
+    </div>
+
+    <h3 style="margin-top:8px">Tips</h3>
+    <p style="font-size:11px;color:rgba(165,180,252,0.4);line-height:1.6">
+      Drag shapes onto canvas. Click to select, double-click to edit. Drag corners to resize. Drag ports to connect. Delete to remove.
+    </p>
+  </div>
+
+  <div class="canvas-wrap" id="canvasWrap">
+    <svg id="connections"></svg>
+    <div id="canvas"></div>
+    <div class="zoom-controls">
+      <button onclick="zoomBy(-0.1)" aria-label="Zoom out">−</button>
+      <span class="zoom-level" id="zoomLevel">100%</span>
+      <button onclick="zoomBy(0.1)" aria-label="Zoom in">+</button>
+      <button onclick="resetZoom()" aria-label="Reset zoom" style="font-size:11px;width:auto;padding:0 8px">Reset</button>
+    </div>
+  </div>
+</div>
+
+<div class="nb-format-bar" id="nbFormatBar">
+  <label>Font</label>
+  <select id="fmtFont" onchange="applyNbFont(this.value)">
+    <option value="">Default</option>
+    <option value="Inter">Inter</option>
+    <option value="Arial">Arial</option>
+    <option value="Georgia">Georgia</option>
+    <option value="Courier New">Courier</option>
+    <option value="Times New Roman">Times</option>
+    <option value="Verdana">Verdana</option>
+    <option value="Trebuchet MS">Trebuchet</option>
+  </select>
+  <label>Color</label>
+  <input type="color" id="fmtColor" value="#334155" oninput="applyNbColor(this.value)">
+  <div class="fmt-swatch" style="background:#1e293b" onclick="applyNbColor('#1e293b')"></div>
+  <div class="fmt-swatch" style="background:#3b82f6" onclick="applyNbColor('#3b82f6')"></div>
+  <div class="fmt-swatch" style="background:#10b981" onclick="applyNbColor('#10b981')"></div>
+  <div class="fmt-swatch" style="background:#f59e0b" onclick="applyNbColor('#f59e0b')"></div>
+  <div class="fmt-swatch" style="background:#ec4899" onclick="applyNbColor('#ec4899')"></div>
+  <div class="fmt-swatch" style="background:#8b5cf6" onclick="applyNbColor('#8b5cf6')"></div>
+  <div class="fmt-swatch" style="background:#ef4444" onclick="applyNbColor('#ef4444')"></div>
+</div>
+<div class="delete-hint" id="deleteHint">Press <kbd>Delete</kbd> or <kbd>Backspace</kbd> to remove</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image-more/3.4.5/dom-to-image-more.min.js"></script>
+<script>
+const canvas = document.getElementById('canvas');
+const canvasWrap = document.getElementById('canvasWrap');
+const svgLayer = document.getElementById('connections');
+const deleteHint = document.getElementById('deleteHint');
+const propsSection = document.getElementById('propsSection');
+
+let shapes = [], lineShapes = [], connections = [], noteLinks = [];
+let selectedId = null, selectedType = null;
+let shapeIdCounter = 0, draggingShape = null, dragOffset = { x: 0, y: 0 };
+let connectingFrom = null, tempLine = null, resizing = null, draggingEndpoint = null;
+const SNAP_RADIUS = 28;
+let zoomScale = 1, presentationMode = false, rafId = null;
+let canvasLocked = false, noteLinkMode = null;
+
+// ---- UNDO SYSTEM ----
+let undoStack = [];
+const MAX_UNDO = 30;
+function saveUndoState() {
+  const state = {
+    shapes: JSON.parse(JSON.stringify(shapes)),
+    lineShapes: JSON.parse(JSON.stringify(lineShapes)),
+    connections: JSON.parse(JSON.stringify(connections)),
+    noteLinks: JSON.parse(JSON.stringify(noteLinks)),
+    shapeIdCounter: shapeIdCounter,
+  };
+  undoStack.push(state);
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+}
+function undoAction() {
+  if (undoStack.length === 0) { showToast('Nothing to undo'); return; }
+  const state = undoStack.pop();
+  shapes = state.shapes;
+  lineShapes = state.lineShapes;
+  connections = state.connections;
+  noteLinks = state.noteLinks;
+  shapeIdCounter = state.shapeIdCounter;
+  canvas.innerHTML = '';
+  shapes.forEach(s => renderShape(s));
+  lineShapes.forEach(ln => renderLine(ln));
+  drawConnections();
+  drawNoteLinks();
+  selectItem(null, null);
+  expandCanvasToFit();
+  generateCode();
+  showToast('Undone');
+}
+
+const shapeDefaults = {
+  rect: { label: 'Process', w: 150, h: 60 },
+  rounded: { label: 'Start', w: 150, h: 60 },
+  diamond: { label: 'Decision', w: 100, h: 100 },
+  circle: { label: 'A', w: 80, h: 80 },
+  parallelogram: { label: 'Input', w: 150, h: 60 },
+  hexagon: { label: 'Prepare', w: 140, h: 80 },
+  cylinder: { label: 'Database', w: 120, h: 80 },
+  notesbox: { label: 'Topic', w: 280, h: 50, fontSize: 15 },
+};
+const shapeColors = {
+  rect: '#3b82f6', rounded: '#10b981', diamond: '#f59e0b', circle: '#ec4899',
+  parallelogram: '#06b6d4', hexagon: '#8b5cf6', cylinder: '#ef4444', notesbox: '#7c3aed',
+};
+const lineDefaults = {
+  'line-straight': { color: '#3b82f6', dash: '' },
+  'line-curved': { color: '#10b981', dash: '' },
+  'line-dotted': { color: '#f59e0b', dash: '3,3' },
+  'line-dashed': { color: '#ec4899', dash: '8,5' },
+};
+const fontColors = [
+  '#1e293b','#334155','#3b82f6','#06b6d4','#2563eb','#8b5cf6',
+  '#7c3aed','#ec4899','#10b981','#f59e0b','#ea580c','#ef4444',
+  '#64748b','#94a3b8','#475569','#0f172a',
+];
+
+function getShapeActualHeight(s) {
+  if (s.type === 'notesbox') {
+    const el = document.getElementById(s.id);
+    if (el) return el.offsetHeight;
+    return s.notesExpanded ? 200 : 50;
+  }
+  return s.h;
+}
+
+// ---- SNAP / PORT ----
+function getShapePortPositions(s) {
+  const ah = getShapeActualHeight(s);
+  return {
+    top:    { x: s.x + s.w / 2, y: s.y },
+    bottom: { x: s.x + s.w / 2, y: s.y + ah },
+    left:   { x: s.x,           y: s.y + ah / 2 },
+    right:  { x: s.x + s.w,     y: s.y + ah / 2 },
+  };
+}
+function getPortPos(shapeId, port) {
+  const s = shapes.find(sh => sh.id === shapeId);
+  if (!s) return { x: 0, y: 0 };
+  const ports = getShapePortPositions(s);
+  return ports[port] || { x: s.x, y: s.y };
+}
+function findNearestSnap(px, py) {
+  let best = null, bestDist = SNAP_RADIUS;
+  for (const s of shapes) {
+    const ports = getShapePortPositions(s);
+    for (const [port, pos] of Object.entries(ports)) {
+      const d = Math.hypot(px - pos.x, py - pos.y);
+      if (d < bestDist) { bestDist = d; best = { shapeId: s.id, port, x: pos.x, y: pos.y }; }
+    }
+  }
+  return best;
+}
+function getSnappedPos(ln, which) {
+  const snap = which === 'start' ? ln.snapStart : ln.snapEnd;
+  if (!snap) return which === 'start' ? { x: ln.x1, y: ln.y1 } : { x: ln.x2, y: ln.y2 };
+  const s = shapes.find(sh => sh.id === snap.shapeId);
+  if (!s) return which === 'start' ? { x: ln.x1, y: ln.y1 } : { x: ln.x2, y: ln.y2 };
+  const ports = getShapePortPositions(s);
+  return ports[snap.port];
+}
+function clearSnapHighlights() { document.querySelectorAll('.port.snap-highlight').forEach(p => p.classList.remove('snap-highlight')); }
+function highlightSnapPort(shapeId, port) {
+  clearSnapHighlights();
+  const el = document.getElementById(shapeId);
+  if (el) { const p = el.querySelector(`.port-${port}`); if (p) p.classList.add('snap-highlight'); }
+}
+function updateSnappedLines(movedShapeId) {
+  for (const ln of lineShapes) {
+    let changed = false;
+    if (ln.snapStart && ln.snapStart.shapeId === movedShapeId) { const pos = getSnappedPos(ln, 'start'); ln.x1 = pos.x; ln.y1 = pos.y; changed = true; }
+    if (ln.snapEnd && ln.snapEnd.shapeId === movedShapeId) { const pos = getSnappedPos(ln, 'end'); ln.x2 = pos.x; ln.y2 = pos.y; changed = true; }
+    if (changed) updateLineEl(ln);
+  }
+}
+
+// ---- DRAG FROM PALETTE ----
+document.querySelectorAll('.palette-item').forEach(item => {
+  item.addEventListener('dragstart', e => { e.dataTransfer.setData('shapeType', item.dataset.type); e.dataTransfer.effectAllowed = 'copy'; });
+});
+canvasWrap.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+canvasWrap.addEventListener('drop', e => {
+  if (presentationMode || canvasLocked) return;
+  e.preventDefault(); e.stopPropagation();
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    const file = e.dataTransfer.files[0];
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width, h = img.height;
+          const maxDim = 300;
+          if (w > maxDim || h > maxDim) { const sc = maxDim / Math.max(w, h); w = Math.round(w * sc); h = Math.round(h * sc); }
+          const rect2 = canvasWrap.getBoundingClientRect();
+          const cx = (e.clientX - rect2.left + canvasWrap.scrollLeft) / zoomScale;
+          const cy = (e.clientY - rect2.top + canvasWrap.scrollTop) / zoomScale;
+          addImageShape(reader.result, cx - w / 2, cy - h / 2, w, h);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+  }
+  const type = e.dataTransfer.getData('shapeType');
+  if (!type) return;
+  const rect = canvasWrap.getBoundingClientRect();
+  const cx = (e.clientX - rect.left + canvasWrap.scrollLeft) / zoomScale;
+  const cy = (e.clientY - rect.top + canvasWrap.scrollTop) / zoomScale;
+  if (type.startsWith('line-')) { addLine(type, cx - 60, cy, cx + 60, cy); }
+  else { const def = shapeDefaults[type]; addShape(type, cx - def.w / 2, cy - def.h / 2); }
+});
+
+// ---- PASTE IMAGES ----
+document.addEventListener('paste', e => {
+  if (presentationMode || canvasLocked) return;
+  const active = document.activeElement;
+  if (active && (active.classList.contains('label') || active.classList.contains('note-text-input'))) return;
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault();
+      const blob = item.getAsFile();
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width, h = img.height;
+          const maxDim = 300;
+          if (w > maxDim || h > maxDim) { const scale = maxDim / Math.max(w, h); w = Math.round(w * scale); h = Math.round(h * scale); }
+          const cx = (canvasWrap.scrollLeft + canvasWrap.clientWidth / 2) / zoomScale;
+          const cy = (canvasWrap.scrollTop + canvasWrap.clientHeight / 2) / zoomScale;
+          addImageShape(reader.result, cx - w / 2, cy - h / 2, w, h);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(blob);
+      break;
+    }
+  }
+});
+
+// ---- SHAPES ----
+function addShape(type, x, y) {
+  saveUndoState();
+  const id = 's' + (++shapeIdCounter);
+  const def = shapeDefaults[type];
+  const shape = {
+    id, type, x, y, w: def.w, h: def.h, label: def.label,
+    fontColor: '#1e293b', fontSize: type === 'notesbox' ? 15 : 13,
+    notes: type === 'notesbox' ? [{ text: '' }] : [],
+    notesExpanded: type === 'notesbox' ? true : false,
+    baseW: def.w,
+  };
+  shapes.push(shape);
+  renderShape(shape);
+  selectItem(id, 'shape');
+  generateCode();
+  expandCanvasToFit();
+}
+
+function addImageShape(dataUrl, x, y, w, h) {
+  saveUndoState();
+  const id = 's' + (++shapeIdCounter);
+  const shape = {
+    id, type: 'image', x, y, w, h, label: '', dataUrl,
+    fontColor: '#1e293b', fontSize: 13, notes: [], notesExpanded: false, baseW: w,
+  };
+  shapes.push(shape);
+  renderShape(shape);
+  selectItem(id, 'shape');
+  generateCode();
+  expandCanvasToFit();
+  showToast('Image pasted');
+}
+
+function renderShape(s) {
+  const el = document.createElement('div');
+  el.className = `shape shape-${s.type}`;
+  el.id = s.id;
+  el.style.left = s.x + 'px';
+  el.style.top = s.y + 'px';
+  el.style.width = s.w + 'px';
+
+  if (s.type === 'notesbox') {
+    renderNotesBox(s, el);
+  } else if (s.type === 'image') {
+    el.style.height = s.h + 'px';
+    const img = document.createElement('img');
+    img.src = s.dataUrl;
+    img.draggable = false;
+    el.appendChild(img);
+    ['top','bottom','left','right'].forEach(pos => {
+      const port = document.createElement('div');
+      port.className = `port port-${pos}`;
+      port.dataset.port = pos;
+      port.dataset.shape = s.id;
+      port.addEventListener('mousedown', startConnection);
+      el.appendChild(port);
+    });
+    ['tl','tr','bl','br','t','b','l','r'].forEach(dir => {
+      const rh = document.createElement('div');
+      rh.className = `resize-handle rh-${dir}`;
+      rh.dataset.dir = dir;
+      rh.addEventListener('mousedown', e => startResize(e, s, dir));
+      el.appendChild(rh);
+    });
+  } else {
+    el.style.height = s.h + 'px';
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.contentEditable = true;
+    label.textContent = s.label;
+    label.style.color = s.fontColor;
+    label.style.fontSize = s.fontSize + 'px';
+    label.addEventListener('input', () => { s.label = label.textContent; generateCode(); });
+    label.addEventListener('mousedown', e => e.stopPropagation());
+    label.addEventListener('click', e => e.stopPropagation());
+    label.addEventListener('focus', e => e.stopPropagation());
+    el.appendChild(label);
+    ['top','bottom','left','right'].forEach(pos => {
+      const port = document.createElement('div');
+      port.className = `port port-${pos}`;
+      port.dataset.port = pos;
+      port.dataset.shape = s.id;
+      port.addEventListener('mousedown', startConnection);
+      el.appendChild(port);
+    });
+    ['tl','tr','bl','br','t','b','l','r'].forEach(dir => {
+      const rh = document.createElement('div');
+      rh.className = `resize-handle rh-${dir}`;
+      rh.dataset.dir = dir;
+      rh.addEventListener('mousedown', e => startResize(e, s, dir));
+      el.appendChild(rh);
+    });
+  }
+
+  el.addEventListener('mousedown', e => {
+    if (presentationMode || canvasLocked) return;
+    if (e.target.classList.contains('port') || e.target.classList.contains('label') ||
+        e.target.classList.contains('resize-handle') || e.target.classList.contains('note-text-input') ||
+        e.target.classList.contains('nb-toggle') || e.target.closest('.nb-toggle') ||
+        e.target.closest('.note-item')) return;
+    selectItem(s.id, 'shape');
+    draggingShape = s;
+    saveUndoState();
+    const wr = canvasWrap.getBoundingClientRect();
+    dragOffset.x = (e.clientX - wr.left + canvasWrap.scrollLeft) / zoomScale - s.x;
+    dragOffset.y = (e.clientY - wr.top + canvasWrap.scrollTop) / zoomScale - s.y;
+    e.preventDefault();
+  });
+
+  el.addEventListener('dblclick', () => {
+    if (presentationMode) return;
+    const label = el.querySelector('.label');
+    if (label) { label.focus(); const range = document.createRange(); range.selectNodeContents(label); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
+  });
+
+  canvas.appendChild(el);
+}
+
+// ---- NOTES BOX RENDERING ----
+function renderNotesBox(s, el) {
+  el.style.height = 'auto';
+  if (!s.notesExpanded) el.classList.add('collapsed');
+  const header = document.createElement('div');
+  header.className = 'nb-header';
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.contentEditable = true;
+  label.innerHTML = s.label;
+  label.style.color = s.fontColor;
+  label.style.fontSize = s.fontSize + 'px';
+  label.addEventListener('input', () => { s.label = label.innerHTML; generateCode(); });
+  label.addEventListener('mousedown', e => e.stopPropagation());
+  label.addEventListener('click', e => e.stopPropagation());
+  label.addEventListener('focus', e => e.stopPropagation());
+  header.appendChild(label);
+  const toggle = document.createElement('div');
+  toggle.className = 'nb-toggle';
+  toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+  toggle.addEventListener('click', e => { e.stopPropagation(); toggleNotesBox(s.id); });
+  toggle.addEventListener('mousedown', e => e.stopPropagation());
+  header.appendChild(toggle);
+  el.appendChild(header);
+  const notesDiv = document.createElement('div');
+  notesDiv.className = 'nb-notes';
+  renderNotesContent(s, notesDiv);
+  el.appendChild(notesDiv);
+  ['top','bottom','left','right'].forEach(pos => {
+    const port = document.createElement('div');
+    port.className = `port port-${pos}`;
+    port.dataset.port = pos;
+    port.dataset.shape = s.id;
+    port.addEventListener('mousedown', startConnection);
+    el.appendChild(port);
+  });
+}
+
+function toggleNotesBox(shapeId) {
+  const s = shapes.find(sh => sh.id === shapeId);
+  if (!s || s.type !== 'notesbox') return;
+  s.notesExpanded = !s.notesExpanded;
+  const el = document.getElementById(shapeId);
+  if (!el) return;
+  el.classList.toggle('collapsed', !s.notesExpanded);
+  setTimeout(() => { updateSnappedLines(shapeId); drawConnections(); drawNoteLinks(); generateCode(); }, 10);
+}
+
+function renderNotesContent(s, container) {
+  container.innerHTML = '';
+  if (!s.notes || s.notes.length === 0) s.notes = [{ text: '' }];
+  s.notes.forEach((note, i) => {
+    const item = document.createElement('div');
+    item.className = 'note-item';
+    const bullet = document.createElement('span');
+    bullet.className = 'note-bullet';
+    bullet.textContent = '•';
+    const inp = document.createElement('div');
+    inp.className = 'note-text-input';
+    inp.contentEditable = true;
+    inp.innerHTML = note.text || '';
+    inp.setAttribute('data-placeholder', 'Type a note...');
+    const autoWidth = () => {
+      if (s.type !== 'notesbox') return;
+      const el = document.getElementById(s.id);
+      if (!el) return;
+      const maxW = Math.round(s.baseW * 1.5);
+      let needed = s.baseW;
+      const measure = document.createElement('canvas').getContext('2d');
+      measure.font = '12px "Inter", system-ui, sans-serif';
+      for (const n of s.notes) {
+        const plainText = n.text ? n.text.replace(/<[^>]*>/g, '') : '';
+        const tw = measure.measureText(plainText).width + 100;
+        if (tw > needed) needed = tw;
+      }
+      const newW = Math.round(Math.min(maxW, Math.max(s.baseW, needed)));
+      if (newW !== s.w) {
+        s.w = newW;
+        el.style.width = newW + 'px';
+        updateSnappedLines(s.id); drawConnections();
+      }
+    };
+    inp.addEventListener('input', () => { note.text = inp.innerHTML; autoWidth(); generateCode(); refreshNotesBoxLines(s.id); });
+    inp.addEventListener('mousedown', e => e.stopPropagation());
+    inp.addEventListener('click', e => e.stopPropagation());
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        s.notes.splice(i + 1, 0, { text: '' });
+        renderNotesContent(s, container);
+        const inputs = container.querySelectorAll('.note-text-input');
+        if (inputs[i + 1]) inputs[i + 1].focus();
+        refreshNotesBoxLines(s.id);
+      }
+      if (e.key === 'Backspace' && inp.textContent.trim() === '' && s.notes.length > 1) {
+        e.preventDefault();
+        s.notes.splice(i, 1);
+        renderNotesContent(s, container);
+        const inputs = container.querySelectorAll('.note-text-input');
+        const fi = Math.max(0, i - 1);
+        if (inputs[fi]) { inputs[fi].focus(); placeCaretAtEnd(inputs[fi]); }
+        refreshNotesBoxLines(s.id);
+      }
+    });
+    const del = document.createElement('button');
+    del.className = 'note-del'; del.textContent = '×';
+    del.addEventListener('click', e => {
+      e.stopPropagation(); s.notes.splice(i, 1);
+      if (s.notes.length === 0) s.notes.push({ text: '' });
+      noteLinks = noteLinks.filter(nl => !(nl.fromShapeId === s.id && nl.noteIndex === i));
+      noteLinks.forEach(nl => { if (nl.fromShapeId === s.id && nl.noteIndex > i) nl.noteIndex--; });
+      renderNotesContent(s, container); generateCode(); drawNoteLinks();
+      refreshNotesBoxLines(s.id);
+    });
+    del.addEventListener('mousedown', e => e.stopPropagation());
+    const linkBtn = document.createElement('button');
+    linkBtn.className = 'note-link-btn';
+    linkBtn.innerHTML = '🔗';
+    linkBtn.title = 'Link to image';
+    const hasLinks = noteLinks.some(nl => nl.fromShapeId === s.id && nl.noteIndex === i);
+    if (hasLinks) linkBtn.classList.add('has-links');
+    if (noteLinkMode && noteLinkMode.shapeId === s.id && noteLinkMode.noteIndex === i) linkBtn.classList.add('linking-active');
+    linkBtn.addEventListener('click', e => { e.stopPropagation(); if (canvasLocked) return; startNoteLink(s.id, i); });
+    linkBtn.addEventListener('mousedown', e => e.stopPropagation());
+    item.appendChild(bullet); item.appendChild(inp); item.appendChild(linkBtn); item.appendChild(del);
+    if (canvasLocked) {
+      const noteHasLinks = noteLinks.some(nl => nl.fromShapeId === s.id && nl.noteIndex === i);
+      if (noteHasLinks) {
+        item.classList.add('has-note-link');
+        item.style.cursor = 'pointer';
+        item.addEventListener('dblclick', e => { if (!canvasLocked) return; e.stopPropagation(); toggleNoteLinkedImages(s.id, i); });
+      }
+    }
+    container.appendChild(item);
+  });
+}
+
+function refreshNotesBoxLines(shapeId) {
+  setTimeout(() => { updateSnappedLines(shapeId); drawConnections(); drawNoteLinks(); expandCanvasToFit(); }, 10);
+}
+
+// ---- RESIZE ----
+function startResize(e, shape, dir) {
+  if (presentationMode || canvasLocked) return;
+  e.stopPropagation(); e.preventDefault();
+  selectItem(shape.id, 'shape');
+  saveUndoState();
+  resizing = { shape, dir, startX: e.clientX, startY: e.clientY, origX: shape.x, origY: shape.y, origW: shape.w, origH: shape.h, origFontSize: shape.fontSize };
+}
+
+document.addEventListener('mousemove', e => {
+  if (resizing) {
+    const { shape, dir, startX, startY, origX, origY, origW, origH, origFontSize } = resizing;
+    const dx = (e.clientX - startX) / zoomScale, dy = (e.clientY - startY) / zoomScale;
+    let nx = origX, ny = origY, nw = origW, nh = origH;
+    const minW = 50, minH = 40;
+    if (dir.includes('r')) nw = Math.max(minW, origW + dx);
+    if (dir.includes('l')) { nw = Math.max(minW, origW - dx); nx = origX + origW - nw; }
+    if (dir.includes('b')) nh = Math.max(minH, origH + dy);
+    if (dir.includes('t')) { nh = Math.max(minH, origH - dy); ny = origY + origH - nh; }
+    const scale = Math.sqrt((nw * nh) / (origW * origH));
+    shape.fontSize = Math.round(Math.min(72, Math.max(8, origFontSize * scale)));
+    shape.x = nx; shape.y = ny; shape.w = nw; shape.h = nh;
+    const el = document.getElementById(shape.id);
+    el.style.left = nx + 'px'; el.style.top = ny + 'px';
+    el.style.width = nw + 'px'; el.style.height = nh + 'px';
+    el.querySelector('.label').style.fontSize = shape.fontSize + 'px';
+    updateSnappedLines(shape.id); drawConnections();
+    return;
+  }
+  if (draggingEndpoint) {
+    const wr = canvasWrap.getBoundingClientRect();
+    const mx = (e.clientX - wr.left + canvasWrap.scrollLeft) / zoomScale;
+    const my = (e.clientY - wr.top + canvasWrap.scrollTop) / zoomScale;
+    const ln = draggingEndpoint.line;
+    const snap = findNearestSnap(mx, my);
+    if (snap) {
+      highlightSnapPort(snap.shapeId, snap.port);
+      if (draggingEndpoint.which === 'start') { ln.x1 = snap.x; ln.y1 = snap.y; ln.snapStart = { shapeId: snap.shapeId, port: snap.port }; }
+      else { ln.x2 = snap.x; ln.y2 = snap.y; ln.snapEnd = { shapeId: snap.shapeId, port: snap.port }; }
+    } else {
+      clearSnapHighlights();
+      if (draggingEndpoint.which === 'start') { ln.x1 = mx; ln.y1 = my; ln.snapStart = null; }
+      else { ln.x2 = mx; ln.y2 = my; ln.snapEnd = null; }
+    }
+    updateLineEl(ln); updateEndpointSnappedState(ln);
+    return;
+  }
+  if (draggingShape) {
+    const wr = canvasWrap.getBoundingClientRect();
+    draggingShape.x = (e.clientX - wr.left + canvasWrap.scrollLeft) / zoomScale - dragOffset.x;
+    draggingShape.y = (e.clientY - wr.top + canvasWrap.scrollTop) / zoomScale - dragOffset.y;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      const el = document.getElementById(draggingShape.id);
+      if (el) { el.style.left = draggingShape.x + 'px'; el.style.top = draggingShape.y + 'px'; }
+      updateSnappedLines(draggingShape.id); drawConnections();
+    });
+    return;
+  }
+  if (connectingFrom && tempLine) {
+    const wr = canvasWrap.getBoundingClientRect();
+    updateTempLine((e.clientX - wr.left + canvasWrap.scrollLeft) / zoomScale, (e.clientY - wr.top + canvasWrap.scrollTop) / zoomScale);
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  if (resizing) { resizing = null; showProps(); generateCode(); expandCanvasToFit(); drawNoteLinks(); }
+  if (draggingEndpoint) { clearSnapHighlights(); draggingEndpoint = null; generateCode(); expandCanvasToFit(); }
+  if (draggingShape) { draggingShape = null; generateCode(); expandCanvasToFit(); drawNoteLinks(); }
+  if (connectingFrom) { if (tempLine) { tempLine.remove(); tempLine = null; } connectingFrom = null; }
+});
+
+// ---- LINES ----
+function updateEndpointSnappedState(ln) {
+  const wrap = document.getElementById(ln.id);
+  if (!wrap) return;
+  const eps = wrap.querySelectorAll('.line-endpoint');
+  eps[0].classList.toggle('snapped', !!ln.snapStart);
+  eps[1].classList.toggle('snapped', !!ln.snapEnd);
+}
+function addLine(type, x1, y1, x2, y2) {
+  saveUndoState();
+  const id = 'l' + (++shapeIdCounter);
+  const def = lineDefaults[type];
+  const ln = { id, type, x1, y1, x2, y2, color: def.color, dash: def.dash, strokeWidth: 2, mirrored: false, snapStart: null, snapEnd: null };
+  lineShapes.push(ln); renderLine(ln); selectItem(id, 'line'); generateCode(); expandCanvasToFit();
+}
+function renderLine(ln) {
+  const wrap = document.createElement('div');
+  wrap.className = 'line-shape'; wrap.id = ln.id;
+  wrap.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;overflow:visible';
+  const hitArea = document.createElementNS('http://www.w3.org/2000/svg', ln.type === 'line-curved' ? 'path' : 'line');
+  hitArea.setAttribute('stroke', 'transparent'); hitArea.setAttribute('stroke-width', '16'); hitArea.setAttribute('fill', 'none');
+  hitArea.style.pointerEvents = 'stroke'; hitArea.style.cursor = 'pointer';
+  hitArea.addEventListener('mousedown', () => { if (!presentationMode) selectItem(ln.id, 'line'); });
+  const line = document.createElementNS('http://www.w3.org/2000/svg', ln.type === 'line-curved' ? 'path' : 'line');
+  line.setAttribute('stroke', ln.color); line.setAttribute('stroke-width', ln.strokeWidth || 2); line.setAttribute('fill', 'none');
+  if (ln.dash) line.setAttribute('stroke-dasharray', ln.dash);
+  svg.appendChild(hitArea); svg.appendChild(line); wrap.appendChild(svg);
+  const ep1 = document.createElement('div'); ep1.className = 'line-endpoint';
+  ep1.addEventListener('mousedown', e => { if (presentationMode) return; e.stopPropagation(); selectItem(ln.id, 'line'); draggingEndpoint = { line: ln, which: 'start' }; });
+  const ep2 = document.createElement('div'); ep2.className = 'line-endpoint';
+  ep2.addEventListener('mousedown', e => { if (presentationMode) return; e.stopPropagation(); selectItem(ln.id, 'line'); draggingEndpoint = { line: ln, which: 'end' }; });
+  wrap.appendChild(ep1); wrap.appendChild(ep2); canvas.appendChild(wrap); updateLineEl(ln);
+}
+function updateLineEl(ln) {
+  const wrap = document.getElementById(ln.id); if (!wrap) return;
+  const elements = wrap.querySelector('svg').querySelectorAll('line, path');
+  const eps = wrap.querySelectorAll('.line-endpoint');
+  const vis = elements[1];
+  if (vis) {
+    vis.setAttribute('stroke', ln.color);
+    vis.setAttribute('stroke-width', ln.strokeWidth || 2);
+    if (ln.dash) vis.setAttribute('stroke-dasharray', ln.dash);
+    else vis.removeAttribute('stroke-dasharray');
+  }
+  if (ln.type === 'line-curved') {
+    const mx = (ln.x1 + ln.x2) / 2;
+    const my = (ln.y1 + ln.y2) / 2;
+    const d = `M${ln.x1},${ln.y1} Q${mx},${ln.y1} ${mx},${my} T${ln.x2},${ln.y2}`;
+    elements.forEach(el => el.setAttribute('d', d));
+  } else {
+    elements.forEach(el => { el.setAttribute('x1', ln.x1); el.setAttribute('y1', ln.y1); el.setAttribute('x2', ln.x2); el.setAttribute('y2', ln.y2); });
+  }
+  eps[0].style.left = (ln.x1 - 7) + 'px'; eps[0].style.top = (ln.y1 - 7) + 'px';
+  eps[1].style.left = (ln.x2 - 7) + 'px'; eps[1].style.top = (ln.y2 - 7) + 'px';
+}
+
+// ---- SELECTION ----
+function selectItem(id, type) {
+  document.querySelectorAll('.shape, .line-shape').forEach(s => s.classList.remove('selected'));
+  selectedId = id; selectedType = type;
+  if (id) { document.getElementById(id).classList.add('selected'); deleteHint.classList.add('visible'); showProps(); }
+  else { deleteHint.classList.remove('visible'); showProps(); }
+}
+canvasWrap.addEventListener('mousedown', e => {
+  if (e.target === canvasWrap || e.target === canvas || e.target.id === 'connections' || e.target.closest('.zoom-controls')) {
+    if (!e.target.closest('.zoom-controls')) selectItem(null, null);
+  }
+});
+
+// ---- PROPERTIES ----
+function showProps() {
+  if (selectedId && selectedType === 'line') {
+    const ln = lineShapes.find(l => l.id === selectedId); if (!ln) return;
+    let html = '<label style="font-size:11px;color:rgba(165,180,252,0.5);margin-bottom:2px">Line Color</label><div class="color-swatches">';
+    const lineColors = ['#3b82f6','#10b981','#f59e0b','#ec4899','#06b6d4','#8b5cf6','#ef4444','#1e293b','#334155','#94a3b8','#ea580c','#475569'];
+    lineColors.forEach(c => { const sel = ln.color === c ? 'border-color:#fff;' : ''; html += `<div class="color-swatch" style="background:${c};${sel}" onclick="setLineColor('${c}')"></div>`; });
+    html += '</div><div class="prop-row" style="margin-top:6px"><label>Custom</label>';
+    html += `<input type="color" value="${ln.color}" onchange="setLineColor(this.value)"></div>`;
+    html += '<label style="font-size:11px;color:rgba(165,180,252,0.5);margin-top:8px;margin-bottom:2px">Line Width</label><div class="prop-row">';
+    html += `<input type="range" min="1" max="10" value="${ln.strokeWidth || 2}" oninput="setLineWidth(Number(this.value))">`;
+    html += `<span class="size-val" id="lineWidthVal">${ln.strokeWidth || 2}px</span></div>`;
+    if (ln.type === 'line-curved') {
+      html += '<div class="prop-row" style="margin-top:8px"><button onclick="mirrorCurvedLine()" style="padding:5px 14px;border:1px solid rgba(52,211,153,0.3);border-radius:var(--radius-sm);background:rgba(52,211,153,0.1);color:#34d399;cursor:pointer;font-size:12px;font-weight:600;width:100%;transition:all .2s;font-family:Inter,system-ui,sans-serif">↔ Mirror Curve</button></div>';
+    }
+    propsSection.innerHTML = html; return;
+  }
+  if (!selectedId || selectedType !== 'shape') { propsSection.innerHTML = '<p style="font-size:11px;color:rgba(165,180,252,0.5)">Select a shape or line to style it</p>'; return; }
+  const s = shapes.find(sh => sh.id === selectedId); if (!s) return;
+  let html = '<label style="font-size:11px;color:rgba(165,180,252,0.5);margin-bottom:2px">Font Color</label><div class="color-swatches">';
+  fontColors.forEach(c => { const sel = s.fontColor === c ? 'border-color:#fff;' : ''; html += `<div class="color-swatch" style="background:${c};${sel}" onclick="setFontColor('${c}')"></div>`; });
+  html += '</div><div class="prop-row" style="margin-top:6px"><label>Custom</label>';
+  html += `<input type="color" value="${s.fontColor}" onchange="setFontColor(this.value)"></div>`;
+  html += '<label style="font-size:11px;color:rgba(165,180,252,0.5);margin-top:8px;margin-bottom:2px">Font Size</label><div class="prop-row">';
+  html += `<input type="range" min="9" max="36" value="${s.fontSize}" oninput="setFontSize(Number(this.value))">`;
+  html += `<span class="size-val" id="sizeVal">${s.fontSize}px</span></div>`;
+  propsSection.innerHTML = html;
+}
+function setFontColor(color) {
+  const s = shapes.find(sh => sh.id === selectedId); if (!s) return;
+  s.fontColor = color; document.getElementById(s.id).querySelector('.label').style.color = color; showProps(); generateCode();
+}
+function setFontSize(size) {
+  const s = shapes.find(sh => sh.id === selectedId); if (!s) return;
+  s.fontSize = size; document.getElementById(s.id).querySelector('.label').style.fontSize = size + 'px';
+  const sv = document.getElementById('sizeVal'); if (sv) sv.textContent = size + 'px'; generateCode();
+}
+function setLineColor(color) {
+  const ln = lineShapes.find(l => l.id === selectedId); if (!ln) return;
+  ln.color = color;
+  const wrap = document.getElementById(ln.id);
+  if (wrap) { const vis = wrap.querySelector('svg').querySelectorAll('line, path')[1]; if (vis) vis.setAttribute('stroke', color); }
+  showProps(); generateCode();
+}
+function setLineWidth(width) {
+  const ln = lineShapes.find(l => l.id === selectedId); if (!ln) return;
+  ln.strokeWidth = width;
+  const wrap = document.getElementById(ln.id);
+  if (wrap) { const vis = wrap.querySelector('svg').querySelectorAll('line, path')[1]; if (vis) vis.setAttribute('stroke-width', width); }
+  const sv = document.getElementById('lineWidthVal'); if (sv) sv.textContent = width + 'px';
+  generateCode();
+}
+function mirrorCurvedLine() {
+  const ln = lineShapes.find(l => l.id === selectedId);
+  if (!ln || ln.type !== 'line-curved') return;
+  saveUndoState();
+  const midX = (ln.x1 + ln.x2) / 2;
+  ln.x1 = midX + (midX - ln.x1);
+  ln.x2 = midX + (midX - ln.x2);
+  ln.snapStart = null; ln.snapEnd = null;
+  updateLineEl(ln); updateEndpointSnappedState(ln); generateCode();
+}
+
+// ---- CONNECTIONS ----
+function startConnection(e) {
+  if (presentationMode || canvasLocked) return;
+  e.stopPropagation(); e.preventDefault();
+  const port = e.target;
+  connectingFrom = { shapeId: port.dataset.shape, port: port.dataset.port };
+  tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  tempLine.setAttribute('stroke', '#3b82f6'); tempLine.setAttribute('stroke-width', '2');
+  tempLine.setAttribute('fill', 'none'); tempLine.setAttribute('stroke-dasharray', '6,4');
+  svgLayer.appendChild(tempLine);
+  const onUp = (ev) => {
+    document.removeEventListener('mouseup', onUp);
+    const target = document.elementFromPoint(ev.clientX, ev.clientY);
+    if (target && target.classList.contains('port')) {
+      const toShape = target.dataset.shape, toPort = target.dataset.port;
+      if (toShape !== connectingFrom.shapeId) {
+        const exists = connections.some(c => c.from === connectingFrom.shapeId && c.fromPort === connectingFrom.port && c.to === toShape && c.toPort === toPort);
+        if (!exists) { saveUndoState(); connections.push({ from: connectingFrom.shapeId, fromPort: connectingFrom.port, to: toShape, toPort: toPort }); drawConnections(); generateCode(); }
+      }
+    }
+    if (tempLine) { tempLine.remove(); tempLine = null; } connectingFrom = null;
+  };
+  document.addEventListener('mouseup', onUp);
+}
+function updateTempLine(mx, my) {
+  const from = getPortPos(connectingFrom.shapeId, connectingFrom.port);
+  tempLine.setAttribute('d', buildCurve(from.x, from.y, mx, my));
+}
+function buildCurve(x1, y1, x2, y2) {
+  const dx = Math.abs(x2 - x1) * 0.5;
+  return `M${x1},${y1} C${x1 + (x2 > x1 ? dx : -dx)},${y1} ${x2 - (x2 > x1 ? dx : -dx)},${y2} ${x2},${y2}`;
+}
+function drawConnections() {
+  Array.from(svgLayer.children).forEach(el => { if (!el.classList.contains('note-link-line')) el.remove(); });
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+  marker.setAttribute('id', 'arrow'); marker.setAttribute('viewBox', '0 0 10 10');
+  marker.setAttribute('refX', '9'); marker.setAttribute('refY', '5');
+  marker.setAttribute('markerWidth', '8'); marker.setAttribute('markerHeight', '8');
+  marker.setAttribute('orient', 'auto-start-reverse');
+  const ap = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  ap.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); ap.setAttribute('fill', '#3b82f6');
+  marker.appendChild(ap); defs.appendChild(marker); svgLayer.appendChild(defs);
+  connections.forEach(c => {
+    const from = getPortPos(c.from, c.fromPort), to = getPortPos(c.to, c.toPort);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', buildCurve(from.x, from.y, to.x, to.y));
+    path.setAttribute('stroke', '#3b82f6'); path.setAttribute('stroke-width', '2');
+    path.setAttribute('fill', 'none'); path.setAttribute('marker-end', 'url(#arrow)');
+    path.style.filter = 'drop-shadow(0 0 2px rgba(59, 130, 246, 0.2))';
+    svgLayer.appendChild(path);
+  });
+}
+
+// ---- DELETE ----
+document.addEventListener('keydown', e => {
+  if (presentationMode) { if (e.key === 'Escape') { exitPresentation(); } return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+    const active = document.activeElement;
+    if (active && (active.classList.contains('label') || active.classList.contains('note-text-input'))) return;
+    e.preventDefault(); undoAction(); return;
+  }
+  if (canvasLocked) return;
+  if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
+    const active = document.activeElement;
+    if (active && (active.classList.contains('label') || active.classList.contains('note-text-input'))) return;
+    e.preventDefault();
+    saveUndoState();
+    const id = selectedId;
+    if (selectedType === 'shape') {
+      shapes = shapes.filter(s => s.id !== id);
+      connections = connections.filter(c => c.from !== id && c.to !== id);
+      noteLinks = noteLinks.filter(nl => nl.fromShapeId !== id && nl.toShapeId !== id);
+    }
+    else { lineShapes = lineShapes.filter(l => l.id !== id); }
+    document.getElementById(id).remove(); selectItem(null, null); drawConnections(); drawNoteLinks(); generateCode();
+  }
+  if (e.key === 'Escape' && noteLinkMode) { cancelNoteLink(); }
+});
+function clearCanvas() {
+  saveUndoState();
+  shapes = []; lineShapes = []; connections = []; noteLinks = []; shapeIdCounter = 0;
+  canvas.innerHTML = ''; svgLayer.innerHTML = '';
+  if (canvasLocked) { canvasLocked = false; document.body.classList.remove('canvas-locked'); updateLockBtn(); }
+  cancelNoteLink();
+  selectItem(null, null); generateCode(); showToast('Canvas cleared');
+}
+
+// ---- CODE GEN (disabled) ----
+function generateCode() {}
+function r(v) { return Math.round(v); }
+
+function downloadCanvasImage() {
+  if (shapes.length === 0 && lineShapes.length === 0) { showToast('Nothing to capture'); return; }
+  const hideEls = [deleteHint, document.querySelector('.zoom-controls'), document.getElementById('codePanel'), document.getElementById('palette'), nbFormatBar];
+  hideEls.forEach(el => { if (el) el.style.visibility = 'hidden'; });
+  const tempStyle = document.createElement('style');
+  tempStyle.textContent = '.port,.resize-handle,.line-endpoint,.delete-hint{display:none!important}.shape{outline:none!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.canvas-wrap::before{display:none!important}';
+  document.head.appendChild(tempStyle);
+  const origZoom = zoomScale;
+  const origScrollL = canvasWrap.scrollLeft, origScrollT = canvasWrap.scrollTop;
+  let maxX = 0, maxY = 0;
+  shapes.forEach(s => {
+    const el = document.getElementById(s.id);
+    if (!el || el.style.display === 'none' || (el.classList.contains('note-linked') && !el.classList.contains('note-visible'))) return;
+    const ah = getShapeActualHeight(s);
+    maxX = Math.max(maxX, s.x + s.w); maxY = Math.max(maxY, s.y + ah);
+  });
+  lineShapes.forEach(ln => {
+    const p1 = getSnappedPos(ln, 'start'), p2 = getSnappedPos(ln, 'end');
+    maxX = Math.max(maxX, p1.x, p2.x); maxY = Math.max(maxY, p1.y, p2.y);
+  });
+  connections.forEach(c => {
+    const from = getPortPos(c.from, c.fromPort), to = getPortPos(c.to, c.toPort);
+    maxX = Math.max(maxX, from.x, to.x); maxY = Math.max(maxY, from.y, to.y);
+  });
+  maxX += 60; maxY += 60;
+  zoomScale = 1; applyZoom();
+  canvasWrap.scrollLeft = 0; canvasWrap.scrollTop = 0;
+  const origOverflow = canvasWrap.style.overflow;
+  const origWidth = canvasWrap.style.width;
+  const origHeight = canvasWrap.style.height;
+  canvasWrap.style.overflow = 'hidden';
+  canvasWrap.style.width = maxX + 'px';
+  canvasWrap.style.height = maxY + 'px';
+  requestAnimationFrame(() => {
+    domtoimage.toPng(canvasWrap, { width: maxX, height: maxY, style: { overflow: 'hidden' }, bgcolor: '#fafafa' }).then(dataUrl => {
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = img.width; c.height = img.height;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        ctx.save();
+        const fs = Math.max(24, Math.round(c.width / 50));
+        ctx.font = '600 ' + fs + 'px "Inter", system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(124, 58, 237, 0.08)'; ctx.textAlign = 'center';
+        ctx.translate(c.width / 2, c.height / 2); ctx.rotate(-Math.PI / 6);
+        const stepX = fs * 14, stepY = fs * 8;
+        for (let wy = -c.height; wy < c.height * 2; wy += stepY) {
+          for (let wx = -c.width; wx < c.width * 2; wx += stepX) { ctx.fillText('Revision Bhai Notes', wx, wy); }
+        }
+        ctx.restore();
+        const link = document.createElement('a');
+        link.download = 'flowchart.png'; link.href = c.toDataURL('image/png'); link.click();
+        showToast('Image downloaded');
+      };
+      img.src = dataUrl;
+    }).catch(() => { showToast('Failed to capture canvas'); }).finally(() => {
+      tempStyle.remove();
+      canvasWrap.style.overflow = origOverflow;
+      canvasWrap.style.width = origWidth;
+      canvasWrap.style.height = origHeight;
+      hideEls.forEach(el => { if (el) el.style.visibility = ''; });
+      zoomScale = origZoom; applyZoom();
+      canvasWrap.scrollLeft = origScrollL; canvasWrap.scrollTop = origScrollT;
+    });
+  });
+}
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+// ---- SAVE / LOAD PROJECT ----
+function saveProject() {
+  const project = { version: 1, shapes: JSON.parse(JSON.stringify(shapes)), lineShapes: JSON.parse(JSON.stringify(lineShapes)), connections: JSON.parse(JSON.stringify(connections)), noteLinks: JSON.parse(JSON.stringify(noteLinks)), shapeIdCounter };
+  const blob = new Blob([JSON.stringify(project)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'flowchart-project.json'; a.click();
+  URL.revokeObjectURL(a.href); showToast('Project saved');
+}
+function loadProject(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const project = JSON.parse(reader.result);
+      if (!project.shapes || !project.lineShapes) { showToast('Invalid project file'); return; }
+      canvas.innerHTML = ''; svgLayer.innerHTML = '';
+      if (canvasLocked) { canvasLocked = false; document.body.classList.remove('canvas-locked'); updateLockBtn(); }
+      cancelNoteLink(); undoStack = [];
+      shapes = project.shapes || []; lineShapes = project.lineShapes || [];
+      connections = project.connections || []; noteLinks = project.noteLinks || [];
+      shapeIdCounter = project.shapeIdCounter || 0;
+      shapes.forEach(s => renderShape(s)); lineShapes.forEach(ln => renderLine(ln));
+      drawConnections(); drawNoteLinks(); selectItem(null, null); expandCanvasToFit(); generateCode(); showToast('Project loaded');
+    } catch (e) { showToast('Failed to load project'); }
+  };
+  reader.readAsText(file); event.target.value = '';
+}
+
+// ---- PRESENTATION MODE ----
+function enterPresentation() { presentationMode = true; document.body.classList.add('presentation-mode'); selectItem(null, null); hideFormatBar(); }
+function exitPresentation() { presentationMode = false; document.body.classList.remove('presentation-mode'); }
+
+// ---- ZOOM ----
+function applyZoom() { canvas.style.transform = `scale(${zoomScale})`; svgLayer.style.transform = `scale(${zoomScale})`; svgLayer.style.transformOrigin = '0 0'; document.getElementById('zoomLevel').textContent = Math.round(zoomScale * 100) + '%'; }
+function zoomBy(delta) { zoomScale = Math.min(3, Math.max(0.2, zoomScale + delta)); applyZoom(); }
+function resetZoom() { zoomScale = 1; applyZoom(); }
+canvasWrap.addEventListener('wheel', e => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); zoomScale = Math.min(3, Math.max(0.2, zoomScale + (e.deltaY > 0 ? -0.08 : 0.08))); applyZoom(); } }, { passive: false });
+
+generateCode();
+
+// ---- RICH TEXT FORMAT BAR ----
+const nbFormatBar = document.getElementById('nbFormatBar');
+let savedSelection = null;
+nbFormatBar.addEventListener('mousedown', e => { if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') e.preventDefault(); });
+function placeCaretAtEnd(el) {
+  const range = document.createRange(); range.selectNodeContents(el); range.collapse(false);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+}
+function saveSelection() { const sel = window.getSelection(); if (sel.rangeCount > 0) savedSelection = sel.getRangeAt(0).cloneRange(); }
+function restoreSelection() { if (!savedSelection) return; const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(savedSelection); }
+function showFormatBar() {
+  if (canvasLocked) { hideFormatBar(); return; }
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || sel.rangeCount === 0) { hideFormatBar(); return; }
+  const anchor = sel.anchorNode;
+  const el = anchor && (anchor.nodeType === 3 ? anchor.parentElement : anchor);
+  if (!el) { hideFormatBar(); return; }
+  const inNotesBox = el.closest('.shape-notesbox');
+  if (!inNotesBox) { hideFormatBar(); return; }
+  const inLabel = el.closest('.label') || el.classList?.contains('label');
+  const inNote = el.closest('.note-text-input') || el.classList?.contains('note-text-input');
+  if (!inLabel && !inNote) { hideFormatBar(); return; }
+  saveSelection();
+  const range = sel.getRangeAt(0); const rect = range.getBoundingClientRect();
+  nbFormatBar.style.left = Math.max(8, rect.left + rect.width / 2 - 160) + 'px';
+  nbFormatBar.style.top = (rect.top - 44) + 'px';
+  nbFormatBar.classList.add('visible');
+}
+function hideFormatBar() { nbFormatBar.classList.remove('visible'); }
+function applyNbColor(color) { restoreSelection(); document.execCommand('foreColor', false, color); document.getElementById('fmtColor').value = color; saveSelection(); syncNoteData(); }
+function applyNbFont(font) { if (!font) return; restoreSelection(); document.execCommand('fontName', false, font); saveSelection(); syncNoteData(); }
+function syncNoteData() {
+  shapes.filter(s => s.type === 'notesbox').forEach(s => {
+    const el = document.getElementById(s.id); if (!el) return;
+    const label = el.querySelector('.nb-header .label'); if (label) s.label = label.innerHTML;
+    const noteInputs = el.querySelectorAll('.nb-notes .note-text-input');
+    noteInputs.forEach((inp, i) => { if (s.notes[i]) s.notes[i].text = inp.innerHTML; });
+  });
+  generateCode();
+}
+document.addEventListener('selectionchange', () => { requestAnimationFrame(showFormatBar); });
+document.addEventListener('mousedown', e => { if (e.target.closest('.nb-format-bar')) return; });
+
+// ---- NOTE LINKING ----
+function startNoteLink(shapeId, noteIndex) {
+  if (canvasLocked) return;
+  if (noteLinkMode && noteLinkMode.shapeId === shapeId && noteLinkMode.noteIndex === noteIndex) { cancelNoteLink(); return; }
+  noteLinkMode = { shapeId, noteIndex };
+  document.body.classList.add('note-linking-mode');
+  showToast('Click an image to link it to this note');
+  refreshNoteLinkBtns();
+}
+function cancelNoteLink() { noteLinkMode = null; document.body.classList.remove('note-linking-mode'); refreshNoteLinkBtns(); }
+function refreshNoteLinkBtns() {
+  shapes.filter(s => s.type === 'notesbox').forEach(s => {
+    const el = document.getElementById(s.id); if (!el) return;
+    const notesDiv = el.querySelector('.nb-notes'); if (notesDiv) renderNotesContent(s, notesDiv);
+  });
+}
+function completeNoteLink(imageShapeId) {
+  if (!noteLinkMode) return;
+  const { shapeId, noteIndex } = noteLinkMode;
+  const exists = noteLinks.some(nl => nl.fromShapeId === shapeId && nl.noteIndex === noteIndex && nl.toShapeId === imageShapeId);
+  if (exists) { noteLinks = noteLinks.filter(nl => !(nl.fromShapeId === shapeId && nl.noteIndex === noteIndex && nl.toShapeId === imageShapeId)); showToast('Link removed'); }
+  else { noteLinks.push({ id: 'nl' + (++shapeIdCounter), fromShapeId: shapeId, noteIndex, toShapeId: imageShapeId }); showToast('Link created'); }
+  cancelNoteLink(); drawNoteLinks();
+}
+canvas.addEventListener('mousedown', e => {
+  if (!noteLinkMode) return;
+  const imageEl = e.target.closest('.shape-image');
+  if (imageEl) { e.stopPropagation(); e.preventDefault(); completeNoteLink(imageEl.id); }
+}, true);
+function getNoteItemCenter(shapeId, noteIndex) {
+  const el = document.getElementById(shapeId); if (!el) return null;
+  const noteItems = el.querySelectorAll('.note-item'); if (!noteItems[noteIndex]) return null;
+  const rect = noteItems[noteIndex].getBoundingClientRect();
+  const wrapRect = canvasWrap.getBoundingClientRect();
+  return { x: (rect.right - wrapRect.left + canvasWrap.scrollLeft) / zoomScale, y: (rect.top + rect.height / 2 - wrapRect.top + canvasWrap.scrollTop) / zoomScale };
+}
+function drawNoteLinks() {
+  svgLayer.querySelectorAll('.note-link-line').forEach(el => el.remove());
+  if (canvasLocked) return;
+  noteLinks.forEach(nl => {
+    const fromShape = shapes.find(s => s.id === nl.fromShapeId);
+    const toShape = shapes.find(s => s.id === nl.toShapeId);
+    if (!fromShape || !toShape) return;
+    if (!fromShape.notesExpanded) return;
+    const fromPos = getNoteItemCenter(nl.fromShapeId, nl.noteIndex); if (!fromPos) return;
+    const toX = toShape.x + toShape.w / 2, toY = toShape.y + toShape.h / 2;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const dx = Math.abs(toX - fromPos.x) * 0.4;
+    line.setAttribute('d', `M${fromPos.x},${fromPos.y} C${fromPos.x + dx},${fromPos.y} ${toX - dx},${toY} ${toX},${toY}`);
+    line.setAttribute('stroke', '#7c3aed'); line.setAttribute('stroke-width', '1.5');
+    line.setAttribute('stroke-dasharray', '5,4'); line.setAttribute('fill', 'none');
+    line.setAttribute('opacity', '0.5'); line.classList.add('note-link-line');
+    svgLayer.appendChild(line);
+  });
+}
+
+// ---- LOCK / UNLOCK CANVAS ----
+function toggleCanvasLock() {
+  canvasLocked = !canvasLocked;
+  document.body.classList.toggle('canvas-locked', canvasLocked);
+  updateLockBtn();
+  if (canvasLocked) {
+    cancelNoteLink(); selectItem(null, null);
+    shapes.filter(s => s.type === 'image').forEach(s => {
+      const el = document.getElementById(s.id); if (!el) return;
+      el.classList.toggle('note-linked', noteLinks.some(nl => nl.toShapeId === s.id));
+      el.classList.remove('note-visible');
+    });
+    svgLayer.querySelectorAll('.note-link-line').forEach(el => el.remove());
+    refreshNoteLinkBtns();
+  } else {
+    shapes.filter(s => s.type === 'image').forEach(s => {
+      const el = document.getElementById(s.id); if (!el) return;
+      el.classList.remove('note-linked', 'note-visible');
+    });
+    drawNoteLinks(); refreshNoteLinkBtns();
+  }
+}
+function updateLockBtn() {
+  const btn = document.getElementById('lockBtn');
+  if (canvasLocked) { btn.classList.add('lock-btn-active'); btn.title = 'Unlock canvas'; }
+  else { btn.classList.remove('lock-btn-active'); btn.title = 'Lock canvas'; }
+}
+function toggleNoteLinkedImages(shapeId, noteIndex) {
+  const linked = noteLinks.filter(nl => nl.fromShapeId === shapeId && nl.noteIndex === noteIndex);
+  if (linked.length === 0) return;
+  const anyVisible = linked.some(nl => { const el = document.getElementById(nl.toShapeId); return el && el.classList.contains('note-visible'); });
+  linked.forEach(nl => { const el = document.getElementById(nl.toShapeId); if (!el) return; el.classList.toggle('note-visible', !anyVisible); });
+}
+
+function togglePalette() { document.getElementById('palette').classList.toggle('collapsed'); }
+function expandAllNotes() {
+  shapes.filter(s => s.type === 'notesbox' && !s.notesExpanded).forEach(s => {
+    s.notesExpanded = true; const el = document.getElementById(s.id); if (el) el.classList.remove('collapsed');
+  });
+  setTimeout(() => { shapes.filter(s => s.type === 'notesbox').forEach(s => { updateSnappedLines(s.id); }); drawConnections(); drawNoteLinks(); expandCanvasToFit(); generateCode(); }, 10);
+}
+function collapseAllNotes() {
+  shapes.filter(s => s.type === 'notesbox' && s.notesExpanded).forEach(s => {
+    s.notesExpanded = false; const el = document.getElementById(s.id); if (el) el.classList.add('collapsed');
+  });
+  setTimeout(() => { shapes.filter(s => s.type === 'notesbox').forEach(s => { updateSnappedLines(s.id); }); drawConnections(); drawNoteLinks(); expandCanvasToFit(); generateCode(); }, 10);
+}
+function expandCanvasToFit() {
+  let minX = 0, minY = 0;
+  for (const s of shapes) { minX = Math.min(minX, s.x); minY = Math.min(minY, s.y); }
+  for (const ln of lineShapes) { minX = Math.min(minX, ln.x1, ln.x2); minY = Math.min(minY, ln.y1, ln.y2); }
+  if (minX < 0 || minY < 0) {
+    const shiftX = minX < 0 ? -minX + 50 : 0;
+    const shiftY = minY < 0 ? -minY + 50 : 0;
+    for (const s of shapes) { s.x += shiftX; s.y += shiftY; const el = document.getElementById(s.id); if (el) { el.style.left = s.x + 'px'; el.style.top = s.y + 'px'; } }
+    for (const ln of lineShapes) { ln.x1 += shiftX; ln.y1 += shiftY; ln.x2 += shiftX; ln.y2 += shiftY; updateLineEl(ln); }
+    drawConnections();
+    canvasWrap.scrollLeft += shiftX * zoomScale;
+    canvasWrap.scrollTop += shiftY * zoomScale;
+  }
+  let maxX = 0, maxY = 0;
+  const pad = 200;
+  for (const s of shapes) { const ah = getShapeActualHeight(s); maxX = Math.max(maxX, s.x + s.w + pad); maxY = Math.max(maxY, s.y + ah + pad); }
+  for (const ln of lineShapes) { maxX = Math.max(maxX, ln.x1 + pad, ln.x2 + pad); maxY = Math.max(maxY, ln.y1 + pad, ln.y2 + pad); }
+  const wrapRect = canvasWrap.getBoundingClientRect();
+  const minW = Math.max(maxX, wrapRect.width / zoomScale);
+  const minH = Math.max(maxY, wrapRect.height / zoomScale);
+  canvas.style.minWidth = minW + 'px';
+  canvas.style.minHeight = minH + 'px';
+  svgLayer.style.width = minW + 'px';
+  svgLayer.style.height = minH + 'px';
+}
+</script>
+
+</body>
+</html>
