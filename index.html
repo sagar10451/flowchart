@@ -6,7 +6,7 @@
 <title>Revision Bhai's Notes and FlowChart</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -28,7 +28,7 @@ body { font-family:'Inter',system-ui,-apple-system,sans-serif; background:var(--
 header { display:flex; align-items:center; gap:12px; padding:0 20px; height:52px; min-height:52px; background:var(--header-bg); border-bottom:1px solid rgba(79,70,229,0.2); z-index:100; box-shadow:0 2px 8px rgba(15,23,42,0.15); }
 .logo { display:flex; align-items:center; gap:10px; margin-right:8px; }
 .logo-icon { width:28px; height:28px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; color:#fff; }
-.logo h1 { font-size:15px; font-weight:700; color:#f1f5f9; letter-spacing:-0.3px; white-space:nowrap; }
+.logo h1 { font-size:15px; font-weight:700; color:#f1f5f9; letter-spacing:-0.3px; white-space:nowrap; font-family:'Playfair Display',serif; }
 .toolbar-sep { width:1px; height:24px; background:rgba(255,255,255,0.1); flex-shrink:0; }
 .toolbar-group { display:flex; gap:2px; align-items:center; }
 .tb { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:34px; padding:0 12px; border:1px solid transparent; border-radius:var(--radius-sm); background:transparent; color:rgba(241,245,249,0.7); cursor:pointer; font:500 12px/1 'Inter',system-ui,sans-serif; transition:all var(--transition); white-space:nowrap; }
@@ -174,9 +174,7 @@ svg#connections { position:absolute; top:0; left:0; pointer-events:none; z-index
 .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
 
 
-/* Presentation mode */
 body.canvas-locked .palette{display:none}
-body.presentation-mode header{display:none}body.presentation-mode .palette{display:none}body.presentation-mode .zoom-controls{display:flex}body.presentation-mode .delete-hint{display:none}body.presentation-mode .shape{cursor:default}body.presentation-mode .port{display:none}body.presentation-mode .resize-handle{display:none}body.presentation-mode .note-del{display:none}body.presentation-mode .note-link-btn{display:none}body.presentation-mode .nb-header-link-btn{display:none}body.presentation-mode .nb-md-toggle{display:none}body.presentation-mode .note-text-input{pointer-events:none}body.presentation-mode .line-endpoint{display:none}body.presentation-mode .nb-header{cursor:default}body.presentation-mode .nb-header .label{pointer-events:none}body.presentation-mode .nb-format-bar{display:none}body.presentation-mode .canvas-wrap{top:0}
 
 /* Note link button */
 .note-link-btn { width:22px; height:22px; border:1.5px solid rgba(139,92,246,0.3); border-radius:5px; background:rgba(139,92,246,0.1); color:#7c3aed; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; opacity:0; transition:all .25s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink:0; padding:0; }
@@ -254,7 +252,7 @@ body.canvas-locked .nb-md-toggle { display:none; }
 
 <header>
   <div class="logo">
-    <div class="logo-icon">⬡</div>
+    <img src="https://drive.google.com/thumbnail?id=1HSzvXnwTjsamCm3Jw-7oG5sU-Klntc6N&sz=w200" alt="logo" style="width:28px;height:28px;border-radius:8px;object-fit:cover;">
     <h1>Revision Bhai</h1>
   </div>
   <div class="toolbar-sep"></div>
@@ -281,7 +279,7 @@ body.canvas-locked .nb-md-toggle { display:none; }
     <input type="file" id="loadFileInput" accept=".json" style="display:none" onchange="loadProject(event)">
   </div>
   <div class="toolbar-sep"></div>
-  <button class="tb tb-accent" onclick="enterPresentation()" title="Presentation mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Present</button>
+
 </header>
 
 
@@ -424,7 +422,7 @@ let selectedId = null, selectedType = null;
 let shapeIdCounter = 0, draggingShape = null, dragOffset = { x: 0, y: 0 };
 let connectingFrom = null, tempLine = null, resizing = null, draggingEndpoint = null;
 const SNAP_RADIUS = 28;
-let zoomScale = 1, presentationMode = false, rafId = null;
+let zoomScale = 1, rafId = null;
 let canvasLocked = false, noteLinkMode = null;
 
 // ---- UNDO SYSTEM ----
@@ -559,7 +557,7 @@ document.querySelectorAll('.palette-item').forEach(item => {
 });
 canvasWrap.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
 canvasWrap.addEventListener('drop', e => {
-  if (presentationMode || canvasLocked) return;
+  if (canvasLocked) return;
   e.preventDefault(); e.stopPropagation();
   if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
     const file = e.dataTransfer.files[0];
@@ -593,7 +591,7 @@ canvasWrap.addEventListener('drop', e => {
 
 // ---- PASTE IMAGES ----
 document.addEventListener('paste', e => {
-  if (presentationMode || canvasLocked) return;
+  if (canvasLocked) return;
   const active = document.activeElement;
   if (active && (active.classList.contains('label') || active.classList.contains('note-text-input') || active.classList.contains('nb-md-textarea'))) return;
   const items = e.clipboardData && e.clipboardData.items;
@@ -720,7 +718,7 @@ function renderShape(s) {
   }
 
   el.addEventListener('mousedown', e => {
-    if (presentationMode || canvasLocked) return;
+    if (canvasLocked) return;
     if (e.target.classList.contains('port') || e.target.classList.contains('label') ||
         e.target.classList.contains('resize-handle') || e.target.classList.contains('note-text-input') ||
         e.target.classList.contains('nb-toggle') || e.target.closest('.nb-toggle') ||
@@ -738,7 +736,6 @@ function renderShape(s) {
   });
 
   el.addEventListener('dblclick', () => {
-    if (presentationMode) return;
     const label = el.querySelector('.label');
     if (label) { label.focus(); const range = document.createRange(); range.selectNodeContents(label); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
   });
@@ -1043,7 +1040,7 @@ function refreshNotesBoxLines(shapeId) {
 
 // ---- RESIZE ----
 function startResize(e, shape, dir) {
-  if (presentationMode || canvasLocked) return;
+  if (canvasLocked) return;
   e.stopPropagation(); e.preventDefault();
   selectItem(shape.id, 'shape');
   saveUndoState();
@@ -1140,15 +1137,15 @@ function renderLine(ln) {
   const hitArea = document.createElementNS('http://www.w3.org/2000/svg', usePath ? 'path' : 'line');
   hitArea.setAttribute('stroke', 'transparent'); hitArea.setAttribute('stroke-width', '16'); hitArea.setAttribute('fill', 'none');
   hitArea.style.pointerEvents = 'stroke'; hitArea.style.cursor = 'pointer';
-  hitArea.addEventListener('mousedown', () => { if (!presentationMode) selectItem(ln.id, 'line'); });
+  hitArea.addEventListener('mousedown', () => { selectItem(ln.id, 'line'); });
   const line = document.createElementNS('http://www.w3.org/2000/svg', usePath ? 'path' : 'line');
   line.setAttribute('stroke', ln.color); line.setAttribute('stroke-width', ln.strokeWidth || 2); line.setAttribute('fill', 'none');
   if (ln.dash) line.setAttribute('stroke-dasharray', ln.dash);
   svg.appendChild(hitArea); svg.appendChild(line); wrap.appendChild(svg);
   const ep1 = document.createElement('div'); ep1.className = 'line-endpoint';
-  ep1.addEventListener('mousedown', e => { if (presentationMode) return; e.stopPropagation(); selectItem(ln.id, 'line'); draggingEndpoint = { line: ln, which: 'start' }; });
+  ep1.addEventListener('mousedown', e => { e.stopPropagation(); selectItem(ln.id, 'line'); draggingEndpoint = { line: ln, which: 'start' }; });
   const ep2 = document.createElement('div'); ep2.className = 'line-endpoint';
-  ep2.addEventListener('mousedown', e => { if (presentationMode) return; e.stopPropagation(); selectItem(ln.id, 'line'); draggingEndpoint = { line: ln, which: 'end' }; });
+  ep2.addEventListener('mousedown', e => { e.stopPropagation(); selectItem(ln.id, 'line'); draggingEndpoint = { line: ln, which: 'end' }; });
   wrap.appendChild(ep1); wrap.appendChild(ep2); canvas.appendChild(wrap); updateLineEl(ln);
 }
 
@@ -1280,7 +1277,7 @@ function flipArcDirection() {
 
 // ---- CONNECTIONS ----
 function startConnection(e) {
-  if (presentationMode || canvasLocked) return;
+  if (canvasLocked) return;
   e.stopPropagation(); e.preventDefault();
   const port = e.target;
   connectingFrom = { shapeId: port.dataset.shape, port: port.dataset.port };
@@ -1337,7 +1334,6 @@ function drawConnections() {
 
 // ---- DELETE ----
 document.addEventListener('keydown', e => {
-  if (presentationMode) { if (e.key === 'Escape') { exitPresentation(); } return; }
   if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
     const active = document.activeElement;
     if (active && (active.classList.contains('label') || active.classList.contains('note-text-input') || active.classList.contains('nb-md-textarea'))) return;
@@ -1359,6 +1355,7 @@ document.addEventListener('keydown', e => {
     document.getElementById(id).remove(); selectItem(null, null); drawConnections(); drawNoteLinks(); generateCode();
   }
   if (e.key === 'Escape' && noteLinkMode) { cancelNoteLink(); }
+  if (e.key === 'Escape') { document.getElementById('downloadTypeOverlay').style.display = 'none'; }
 });
 function clearCanvas() {
   if (canvasLocked) return;
@@ -1445,6 +1442,10 @@ function downloadCanvasImage() {
 
 function downloadViewerHTML() {
   if (shapes.length === 0 && lineShapes.length === 0) { showToast('Nothing to export'); return; }
+  document.getElementById('downloadTypeOverlay').style.display = 'flex';
+}
+function doDownloadHTML(pageTitle, subtitle) {
+  document.getElementById('downloadTypeOverlay').style.display = 'none';
   const payload = {
     version: 1,
     exportedAt: new Date().toISOString(),
@@ -1459,13 +1460,16 @@ function downloadViewerHTML() {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flowchart Viewer</title>
+<title>${pageTitle}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#f8f9fb;--surface:#ffffff;--surface2:#f3f4f6;--border:rgba(15,23,42,.08);--text:#0f172a;--text-dim:#475569;--accent:#4f46e5;--header-bg:#1e293b;--radius-sm:6px;--radius-md:10px;--radius-lg:14px}
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
-.viewer-header{height:52px;min-height:52px;background:var(--header-bg);border-bottom:1px solid rgba(79,70,229,.2);display:flex;align-items:center;padding:0 16px;color:#f1f5f9}
-.viewer-title{font-size:13px;font-weight:600;opacity:.9}
+.viewer-header{height:52px;min-height:52px;background:var(--header-bg);border-bottom:1px solid rgba(79,70,229,.2);display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:#f1f5f9}
+.viewer-title{font-size:18px;font-weight:600;opacity:.9}
 .viewer-sub{font-size:11px;color:rgba(226,232,240,.65);margin-left:8px}
 .main{flex:1;position:relative;overflow:hidden}
 .canvas-wrap{position:relative;width:100%;height:100%;overflow:auto;background:var(--bg);cursor:default}
@@ -1512,7 +1516,12 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
 .nb-md-rendered li{margin:2px 0}
 .nb-md-rendered code{background:rgba(79,70,229,.08);padding:1px 4px;border-radius:3px;font-family:'SF Mono','Consolas',monospace;font-size:12px;color:var(--accent)}
 .nb-md-rendered pre{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;margin:6px 0;overflow-x:auto}
+.nb-md-rendered pre code{background:none;padding:0}
 .nb-md-rendered blockquote{border-left:3px solid var(--accent);padding-left:10px;margin:6px 0;color:var(--text-dim)}
+.nb-md-rendered table{border-collapse:collapse;margin:6px 0;width:100%}
+.nb-md-rendered th,.nb-md-rendered td{border:1px solid var(--border);padding:4px 8px;font-size:12px}
+.nb-md-rendered th{background:var(--surface2)}
+.nb-md-rendered hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 .line-shape{position:absolute;z-index:5;pointer-events:none}
 .md-fullscreen-overlay{position:fixed;inset:0;z-index:9000;background:rgba(15,23,42,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center}
 .md-fullscreen-overlay.visible{display:flex}
@@ -1522,11 +1531,21 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
 .md-fullscreen-close{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--radius-sm);background:transparent;cursor:pointer;font-size:18px}
 .md-fullscreen-body{flex:1;overflow-y:auto;padding:20px}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"><\/script>
 </head>
 <body>
-  <div class="viewer-header">
-    <div class="viewer-title">Revision Bhai Viewer</div>
-    <div class="viewer-sub">Read-only standalone export</div>
+  <div class="viewer-header" style="${subtitle ? 'height:72px;min-height:72px;padding:0 20px' : 'height:68px;min-height:68px;padding:0 16px'}">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="https://drive.google.com/thumbnail?id=1HSzvXnwTjsamCm3Jw-7oG5sU-Klntc6N&sz=w200" alt="logo" style="width:50px;height:50px;border-radius:14px;object-fit:cover;flex-shrink:0">
+      <div>
+        <div class="viewer-title" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;letter-spacing:1px">${pageTitle}</div>
+        ${subtitle ? '<div style="font-size:14px;color:rgba(224,231,255,.7);margin-top:5px">' + subtitle + '</div>' : ''}
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="expandAll()" style="padding:5px 12px;background:rgba(79,70,229,0.15);border:1px solid rgba(79,70,229,0.4);border-radius:6px;color:#818cf8;font-size:16px;font-weight:600;cursor:pointer">Expand All</button>
+      <button onclick="collapseAll()" style="padding:5px 12px;background:rgba(79,70,229,0.1);border:1px solid rgba(79,70,229,0.3);border-radius:6px;color:#818cf8;font-size:16px;font-weight:600;cursor:pointer">Collapse All</button>
+    </div>
   </div>
   <div class="main">
     <div class="canvas-wrap" id="canvasWrap">
@@ -1535,7 +1554,6 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
     </div>
   </div>
   <div class="zoom-controls">
-    <button id="panBtn" aria-label="Pan">✋</button>
     <button id="zoomOut" aria-label="Zoom out">−</button>
     <span class="zoom-level" id="zoomLevel">100%</span>
     <button id="zoomIn" aria-label="Zoom in">+</button>
@@ -1565,7 +1583,6 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
     var canvas = document.getElementById('canvas');
     var canvasWrap = document.getElementById('canvasWrap');
     var svgLayer = document.getElementById('connections');
-    var panBtn = document.getElementById('panBtn');
     function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
     function inlineMd(t){
       return t.replace(/\x60([^\x60]+)\x60/g,'<code>$1</code>')
@@ -1575,24 +1592,8 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
     }
     function renderMarkdown(text){
       if(!text) return '<p style="color:rgba(148,163,184,.8);font-style:italic">No markdown content</p>';
-      var safe = esc(text).replace(/\\r/g,'');
-      safe = safe.replace(/\x60\x60\x60([\\s\\S]*?)\x60\x60\x60/g,function(_,code){return '<pre><code>'+code+'</code></pre>';});
-      safe = safe.replace(/^####\\s+(.+)$/gm,'<h4>$1</h4>');
-      safe = safe.replace(/^###\\s+(.+)$/gm,'<h3>$1</h3>');
-      safe = safe.replace(/^##\\s+(.+)$/gm,'<h2>$1</h2>');
-      safe = safe.replace(/^#\\s+(.+)$/gm,'<h1>$1</h1>');
-      safe = safe.replace(/^>\\s+(.+)$/gm,'<blockquote>$1</blockquote>');
-      safe = safe.replace(/^(\\s*[-*]\\s+.+(?:\\n\\s*[-*]\\s+.+)*)/gm,function(block){
-        var items = block.split(/\\n/).map(function(l){return '<li>'+l.replace(/^\\s*[-*]\\s+/,'')+'</li>';}).join('');
-        return '<ul>'+items+'</ul>';
-      });
-      safe = safe.replace(/^(\\s*\\d+\\.\\s+.+(?:\\n\\s*\\d+\\.\\s+.+)*)/gm,function(block){
-        var items = block.split(/\\n/).map(function(l){return '<li>'+l.replace(/^\\s*\\d+\\.\\s+/,'')+'</li>';}).join('');
-        return '<ol>'+items+'</ol>';
-      });
-      safe = safe.replace(/^(?!<h\\d|<ul>|<ol>|<li>|<pre>|<blockquote>)([^\\n<][^\\n]*)$/gm,'<p>$1</p>');
-      safe = inlineMd(safe);
-      return safe;
+      try { if(typeof marked!=='undefined'){ marked.setOptions({breaks:true,gfm:true}); return marked.parse(text); } } catch(e){}
+      return '<pre>'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre>';
     }
     function getShapeById(id){ return shapes.find(function(s){ return s.id===id; }); }
     function getShapeActualHeight(s){
@@ -1657,6 +1658,16 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
     function closeMdFullscreen(){ document.getElementById('mdFullscreenOverlay').classList.remove('visible'); }
     document.getElementById('mdFullscreenClose').addEventListener('click', closeMdFullscreen);
     document.addEventListener('keydown', function(e){ if (e.key==='Escape') closeMdFullscreen(); });
+    window.expandAll = function(){
+      shapes.filter(function(s){ return s.type==='notesbox' && !s.notesExpanded && !s.mdMode; }).forEach(function(s){
+        s.notesExpanded=true; var el=document.getElementById(s.id); if(el) el.classList.remove('collapsed');
+      });
+    };
+    window.collapseAll = function(){
+      shapes.filter(function(s){ return s.type==='notesbox' && s.notesExpanded && !s.mdMode; }).forEach(function(s){
+        s.notesExpanded=false; var el=document.getElementById(s.id); if(el) el.classList.add('collapsed');
+      });
+    };
     function renderNotesBox(s, el){
       el.style.height = 'auto';
       el.classList.toggle('collapsed', !s.notesExpanded);
@@ -1688,14 +1699,13 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
       el.appendChild(header);
       var notesDiv = document.createElement('div');
       notesDiv.className = 'nb-notes';
-      if (s.mdMode){
-        var rendered = document.createElement('div');
-        rendered.className = 'nb-md-rendered';
-        rendered.innerHTML = renderMarkdown(s.mdContent || '');
-        notesDiv.appendChild(rendered);
+      var hasContent = s.mdMode ? !!s.mdContent : (s.notes && s.notes.some(function(n){ return n.text && n.text.replace(/<[^>]*>/g,'').trim(); }));
+      if (!hasContent || s.mdMode) {
+        notesDiv.style.display = 'none';
       } else {
         if (!s.notes || s.notes.length === 0) s.notes = [{text:''}];
         s.notes.forEach(function(note, i){
+          if (!note.text || !note.text.replace(/<[^>]*>/g,'').trim()) return;
           var item = document.createElement('div');
           item.className = 'note-item';
           var bullet = document.createElement('span');
@@ -1837,11 +1847,6 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
         applyZoom();
       }
     }, { passive:false });
-    panBtn.addEventListener('click', function(){
-      panMode = !panMode;
-      panBtn.classList.toggle('pan-active', panMode);
-      canvasWrap.style.cursor = panMode ? 'grab' : 'default';
-    });
     var isPanning = false, panStartX = 0, panStartY = 0, panScrollL = 0, panScrollT = 0;
     canvasWrap.addEventListener('mousedown', function(e){
       if (!panMode && e.button !== 1) return;
@@ -1882,7 +1887,7 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'flowchart-viewer.html';
+  a.download = pageTitle.toLowerCase().replace(/\s+/g, '-') + '.html';
   a.click();
   URL.revokeObjectURL(a.href);
   showToast('Viewer HTML downloaded');
@@ -1917,9 +1922,6 @@ function loadProject(event) {
   reader.readAsText(file); event.target.value = '';
 }
 
-// ---- PRESENTATION MODE ----
-function enterPresentation() { presentationMode = true; document.body.classList.add('presentation-mode'); selectItem(null, null); hideFormatBar(); }
-function exitPresentation() { presentationMode = false; document.body.classList.remove('presentation-mode'); }
 
 // ---- ZOOM ----
 function applyZoom() { canvas.style.transform = `scale(${zoomScale})`; svgLayer.style.transform = `scale(${zoomScale})`; svgLayer.style.transformOrigin = '0 0'; document.getElementById('zoomLevel').textContent = Math.round(zoomScale * 100) + '%'; }
@@ -2143,6 +2145,18 @@ function expandCanvasToFit() {
   svgLayer.style.height = minH + 'px';
 }
 </script>
+
+<!-- Download type modal -->
+<div id="downloadTypeOverlay" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.6);backdrop-filter:blur(8px);align-items:center;justify-content:center">
+  <div style="background:#1e293b;border:1px solid rgba(79,70,229,0.3);border-radius:14px;padding:32px 40px;text-align:center;box-shadow:0 12px 40px rgba(15,23,42,0.4)">
+    <div style="font-size:15px;font-weight:600;color:#f1f5f9;margin-bottom:8px">Choose Download Option</div>
+    <div style="font-size:12px;color:rgba(148,163,184,0.7);margin-bottom:24px">Select the type for your HTML file</div>
+    <div style="display:flex;gap:12px;justify-content:center">
+      <button onclick="doDownloadHTML('Revision Bhai FlowChat Notes', 'We don\'t motivate — we teach')" style="padding:10px 28px;background:rgba(79,70,229,0.15);border:1px solid rgba(79,70,229,0.4);border-radius:8px;color:#818cf8;font-size:13px;font-weight:600;cursor:pointer">Social</button>
+      <button onclick="doDownloadHTML('Dev Notes', '')" style="padding:10px 28px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#34d399;font-size:13px;font-weight:600;cursor:pointer">Dev</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
