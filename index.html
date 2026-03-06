@@ -214,6 +214,10 @@ body.canvas-locked .shape-notesbox.heading-has-links .nb-header .label { cursor:
 .nb-md-toggle:hover { background:rgba(139,92,246,0.2); border-color:rgba(139,92,246,0.4); transform:scale(1.05); }
 .nb-md-toggle.active { background:linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.1)); border-color:rgba(16,185,129,0.35); color:#059669; box-shadow:0 0 0 3px rgba(16,185,129,0.1); }
 body.canvas-locked .nb-md-toggle { display:none; }
+.nb-topic-toggle { height:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:var(--radius-sm); transition:all .25s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink:0; margin-left:6px; background:rgba(139,92,246,0.12); border:1.5px solid rgba(139,92,246,0.3); color:#7c3aed; font-size:10px; font-weight:700; font-family:'Inter',system-ui,sans-serif; user-select:none; padding:0 6px; }
+.nb-topic-toggle:hover { background:rgba(139,92,246,0.2); border-color:rgba(139,92,246,0.4); transform:scale(1.05); }
+.nb-topic-toggle.is-sub { background:rgba(100,116,139,0.1); border-color:rgba(100,116,139,0.3); color:#64748b; }
+body.canvas-locked .nb-topic-toggle { display:none; }
 .nb-md-textarea { width:100%; min-height:80px; max-height:200px; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:'SF Mono','Fira Code','Consolas',monospace; font-size:12px; line-height:1.5; padding:8px; resize:vertical; outline:none; }
 .nb-md-textarea:focus { border-color:var(--accent); }
 .nb-md-rendered { font-size:13px; line-height:1.6; color:var(--text); padding:4px 0; }
@@ -553,7 +557,12 @@ function updateSnappedLines(movedShapeId) {
 
 // ---- DRAG FROM PALETTE ----
 document.querySelectorAll('.palette-item').forEach(item => {
-  item.addEventListener('dragstart', e => { e.dataTransfer.setData('shapeType', item.dataset.type); e.dataTransfer.effectAllowed = 'copy'; });
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('shapeType', item.dataset.type);
+    e.dataTransfer.effectAllowed = 'copy';
+    setTimeout(() => { document.getElementById('palette').style.pointerEvents = 'none'; }, 0);
+  });
+  item.addEventListener('dragend', () => { document.getElementById('palette').style.pointerEvents = ''; });
 });
 canvasWrap.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
 canvasWrap.addEventListener('drop', e => {
@@ -632,6 +641,7 @@ function addShape(type, x, y) {
     notesExpanded: type === 'notesbox' ? true : false,
     baseW: def.w,
     mdMode: false, mdContent: '',
+    isTopic: true,
   };
   shapes.push(shape);
   renderShape(shape);
@@ -723,6 +733,7 @@ function renderShape(s) {
         e.target.classList.contains('resize-handle') || e.target.classList.contains('note-text-input') ||
         e.target.classList.contains('nb-toggle') || e.target.closest('.nb-toggle') ||
         e.target.classList.contains('nb-md-toggle') || e.target.closest('.nb-md-toggle') ||
+        e.target.classList.contains('nb-topic-toggle') || e.target.closest('.nb-topic-toggle') ||
         e.target.classList.contains('nb-header-link-btn') || e.target.closest('.nb-header-link-btn') ||
         e.target.classList.contains('nb-md-textarea') ||
         e.target.closest('.note-item')) return;
@@ -811,6 +822,24 @@ function renderNotesBox(s, el) {
   });
   mdToggle.addEventListener('mousedown', e => e.stopPropagation());
   header.appendChild(mdToggle);
+
+  // Topic/Sub toggle (hidden when locked via CSS)
+  if (s.isTopic === undefined) s.isTopic = true;
+  const topicToggle = document.createElement('div');
+  topicToggle.className = 'nb-topic-toggle' + (s.isTopic ? '' : ' is-sub');
+  topicToggle.title = s.isTopic ? 'Mark as Sub Topic' : 'Mark as Topic';
+  topicToggle.textContent = s.isTopic ? 'Topic' : 'Sub';
+  topicToggle.addEventListener('click', e => {
+    e.stopPropagation();
+    if (canvasLocked) return;
+    s.isTopic = !s.isTopic;
+    topicToggle.textContent = s.isTopic ? 'Topic' : 'Sub';
+    topicToggle.title = s.isTopic ? 'Mark as Sub Topic' : 'Mark as Topic';
+    topicToggle.classList.toggle('is-sub', !s.isTopic);
+    generateCode();
+  });
+  topicToggle.addEventListener('mousedown', e => e.stopPropagation());
+  header.appendChild(topicToggle);
 
   const toggle = document.createElement('div');
   toggle.className = 'nb-toggle';
@@ -1502,6 +1531,26 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
 .shape-notesbox .nb-notes{padding:10px 14px 14px;display:flex;flex-direction:column;gap:6px;background:rgba(243,232,255,.6)}
 .shape-notesbox.collapsed .nb-notes{display:none}
 .shape-notesbox.md-active-box .nb-toggle{display:none}
+.shape-notesbox.status-done{border-color:#10b981 !important;background:linear-gradient(135deg,rgba(209,250,229,0.7) 0%,rgba(167,243,208,0.5) 100%) !important}
+.shape-notesbox.status-in-progress{border-color:#f59e0b !important;background:linear-gradient(135deg,rgba(254,243,199,0.7) 0%,rgba(253,230,138,0.5) 100%) !important}
+.progress-counter{position:fixed;top:80px;right:20px;z-index:200;background:rgba(15,23,42,0.92);border:1px solid rgba(56,189,248,0.2);border-radius:14px;padding:14px 18px;backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(0,0,0,0.4)}
+.progress-counter.pulse{animation:pcPulse 0.5s ease}
+@keyframes pcPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08);box-shadow:0 0 20px rgba(56,189,248,0.35)}}
+.pc-row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:13px;font-weight:600}
+.pc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.pc-done{color:#34d399}.pc-done .pc-dot{background:#34d399}
+.pc-prog{color:#fbbf24}.pc-prog .pc-dot{background:#fbbf24}
+.pc-inactive{color:#4a5568}.pc-inactive .pc-dot{background:#4a5568}
+.pc-reset{margin-top:8px;padding:5px 10px;background:rgba(220,38,38,0.7);color:#fff;border:1px solid #ef4444;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;float:right}
+.pc-reset:hover{background:#dc2626}
+.nb-status-bar{display:flex;gap:6px;padding:6px 12px;justify-content:flex-end;border-top:1px solid rgba(139,92,246,0.15);background:rgba(139,92,246,0.04);border-radius:0 0 12px 12px}
+.nb-progress-btns-inline{display:flex;gap:6px;margin-left:auto;flex-shrink:0}
+.nb-prog-btn{padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid;transition:all 0.2s}
+.nb-prog-btn.done-btn{background:rgba(16,185,129,0.1);color:#059669;border-color:rgba(16,185,129,0.3)}
+.nb-prog-btn.prog-btn{background:rgba(245,158,11,0.1);color:#b45309;border-color:rgba(245,158,11,0.3)}
+.nb-prog-btn.active-btn{opacity:1;box-shadow:0 0 0 2px currentColor}
+.nb-prog-btn:not(.active-btn){opacity:0.55}
+.nb-prog-btn:hover{opacity:1}
 .shape-image{background:transparent;border:none;border-radius:0;padding:0;overflow:visible;box-shadow:none}
 .shape-image img{width:100%;height:100%;object-fit:contain;pointer-events:none;display:block;border-radius:4px}
 .shape-image.note-linked{display:none}
@@ -1558,6 +1607,11 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
     <span class="zoom-level" id="zoomLevel">100%</span>
     <button id="zoomIn" aria-label="Zoom in">+</button>
     <button id="zoomReset" aria-label="Reset zoom" style="font-size:11px;width:auto;padding:0 8px">Reset</button>
+  </div>
+  <div class="progress-counter" id="progressCounter">
+    <div class="pc-row pc-done pc-inactive" id="pcDoneRow"><span class="pc-dot"></span><span>Done: <span id="pcDoneCount">0</span></span></div>
+    <div class="pc-row pc-prog pc-inactive" id="pcProgRow"><span class="pc-dot"></span><span>In Progress: <span id="pcProgCount">0</span></span></div>
+    <button class="pc-reset" onclick="window.resetProgress()">Reset</button>
   </div>
   <div class="md-fullscreen-overlay" id="mdFullscreenOverlay">
     <div class="md-fullscreen-content">
@@ -1668,6 +1722,66 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
         s.notesExpanded=false; var el=document.getElementById(s.id); if(el) el.classList.add('collapsed');
       });
     };
+    var LS_KEY = 'rb_progress_${pageTitle.replace(/\s+/g, "_")}';
+    function saveProgress(){
+      var data = {};
+      shapes.filter(function(s){ return s.type==='notesbox' && s.isTopic !== false && s._status; }).forEach(function(s){ data[s.id] = s._status; });
+      try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch(e){}
+    }
+    function loadProgress(){
+      try {
+        var raw = localStorage.getItem(LS_KEY);
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        shapes.forEach(function(s){
+          if (s.type==='notesbox' && s.isTopic !== false && data[s.id]) {
+            s._status = data[s.id];
+            var el = document.getElementById(s.id);
+            if (el) { el.classList.toggle('status-done', s._status==='done'); el.classList.toggle('status-in-progress', s._status==='in-progress'); }
+          }
+        });
+        updateProgressCounter();
+      } catch(e){}
+    }
+    function updateProgressCounter(){
+      var done = shapes.filter(function(s){ return s.type==='notesbox' && s.isTopic !== false && s._status==='done'; }).length;
+      var prog = shapes.filter(function(s){ return s.type==='notesbox' && s.isTopic !== false && s._status==='in-progress'; }).length;
+      document.getElementById('pcDoneCount').textContent = done;
+      document.getElementById('pcProgCount').textContent = prog;
+      var doneRow = document.getElementById('pcDoneRow');
+      var progRow = document.getElementById('pcProgRow');
+      doneRow.classList.toggle('pc-inactive', done === 0);
+      progRow.classList.toggle('pc-inactive', prog === 0);
+      var counter = document.getElementById('progressCounter');
+      counter.classList.add('pulse');
+      setTimeout(function(){ counter.classList.remove('pulse'); }, 500);
+    }
+    window.setBoxStatus = function(s, el, status){
+      if (s._status === status) return;
+      s._status = status;
+      el.classList.toggle('status-done', status === 'done');
+      el.classList.toggle('status-in-progress', status === 'in-progress');
+      var btns = el.querySelectorAll('.nb-prog-btn');
+      btns.forEach(function(b){
+        b.classList.toggle('active-btn', (b.classList.contains('done-btn') && status==='done') || (b.classList.contains('prog-btn') && status==='in-progress'));
+      });
+      updateProgressCounter();
+      saveProgress();
+    };
+    window.resetProgress = function(){
+      shapes.forEach(function(s){
+        if (s.type==='notesbox' && s.isTopic !== false) {
+          s._status = null;
+          var el = document.getElementById(s.id);
+          if (el) {
+            el.classList.remove('status-done','status-in-progress');
+            el.querySelectorAll('.nb-prog-btn').forEach(function(b){ b.classList.remove('active-btn'); });
+          }
+        }
+      });
+      updateProgressCounter();
+      try { localStorage.removeItem(LS_KEY); } catch(e){}
+    };
     function renderNotesBox(s, el){
       el.style.height = 'auto';
       el.classList.toggle('collapsed', !s.notesExpanded);
@@ -1685,6 +1799,7 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
         else if (noteLinks.some(function(nl){ return nl.fromShapeId===s.id && nl.noteIndex===-1; })) toggleNoteLinkedImages(s.id, -1);
       });
       header.appendChild(label);
+      var hasContent = s.mdMode ? !!s.mdContent : (s.notes && s.notes.some(function(n){ return n.text && n.text.replace(/<[^>]*>/g,'').trim(); }));
       var toggle = document.createElement('div');
       toggle.className = 'nb-toggle';
       toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
@@ -1695,11 +1810,34 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
         el.classList.toggle('collapsed', !s.notesExpanded);
         setTimeout(function(){ drawConnections(); }, 10);
       });
-      header.appendChild(toggle);
+      if (hasContent && !s.mdMode) header.appendChild(toggle);
+      if (s.isTopic !== false) {
+        var progBtns = document.createElement('div');
+        progBtns.className = s.mdMode ? 'nb-progress-btns-inline' : 'nb-status-bar';
+        var doneBtn = document.createElement('button');
+        doneBtn.className = 'nb-prog-btn done-btn' + (s._status === 'done' ? ' active-btn' : '');
+        doneBtn.textContent = '✓ Done';
+        doneBtn.addEventListener('click', function(ev){ ev.stopPropagation(); window.setBoxStatus(s, el, 'done'); });
+        var progBtn = document.createElement('button');
+        progBtn.className = 'nb-prog-btn prog-btn' + (s._status === 'in-progress' ? ' active-btn' : '');
+        progBtn.textContent = '⏳ In Progress';
+        progBtn.addEventListener('click', function(ev){ ev.stopPropagation(); window.setBoxStatus(s, el, 'in-progress'); });
+        progBtns.appendChild(doneBtn);
+        progBtns.appendChild(progBtn);
+        if (s.mdMode && hasContent) header.appendChild(progBtns);
+      }
+      if (s.mdMode && hasContent) {
+        el.style.position = 'relative';
+        el.style.paddingBottom = '38px';
+        var hint = document.createElement('div');
+        hint.style.cssText = 'position:absolute;bottom:6px;right:10px;font-size:10px;color:rgba(124,58,237,0.45);font-style:italic;white-space:nowrap;cursor:pointer;user-select:none';
+        hint.textContent = '📖 double click on topic to read';
+        hint.addEventListener('dblclick', function(ev){ ev.preventDefault(); ev.stopPropagation(); openMdFullscreen(s); });
+        el.appendChild(hint);
+      }
       el.appendChild(header);
       var notesDiv = document.createElement('div');
       notesDiv.className = 'nb-notes';
-      var hasContent = s.mdMode ? !!s.mdContent : (s.notes && s.notes.some(function(n){ return n.text && n.text.replace(/<[^>]*>/g,'').trim(); }));
       if (!hasContent || s.mdMode) {
         notesDiv.style.display = 'none';
       } else {
@@ -1724,6 +1862,7 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
         });
       }
       el.appendChild(notesDiv);
+      if (s.isTopic !== false && progBtns && hasContent && !s.mdMode) el.appendChild(progBtns);
     }
     function renderShape(s){
       var el = document.createElement('div');
@@ -1875,6 +2014,7 @@ svg#connections{position:absolute;top:0;left:0;pointer-events:none;z-index:1;tra
       el.classList.toggle('note-linked', linked);
       el.classList.remove('note-visible');
     });
+    loadProgress();
     setTimeout(function(){
       expandCanvasToFit();
       drawConnections();
@@ -1915,6 +2055,7 @@ function loadProject(event) {
       shapes = project.shapes || []; lineShapes = project.lineShapes || [];
       connections = project.connections || []; noteLinks = project.noteLinks || [];
       shapeIdCounter = project.shapeIdCounter || 0;
+      shapes.forEach(s => { if (s.type === 'notesbox' && s.isTopic === undefined) s.isTopic = true; });
       shapes.forEach(s => renderShape(s)); lineShapes.forEach(ln => renderLine(ln));
       drawConnections(); drawNoteLinks(); selectItem(null, null); expandCanvasToFit(); generateCode(); showToast('Project loaded');
     } catch (e) { showToast('Failed to load project'); }
