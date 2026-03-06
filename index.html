@@ -283,6 +283,7 @@ body.canvas-locked .nb-topic-toggle { display:none; }
     <input type="file" id="loadFileInput" accept=".json" style="display:none" onchange="loadProject(event)">
   </div>
   <div class="toolbar-sep"></div>
+  <button class="tb" onclick="document.getElementById('aboutOverlay').style.display='flex'" title="About">About</button>
 
 </header>
 
@@ -2313,6 +2314,117 @@ function expandCanvasToFit() {
   svgLayer.style.height = minH + 'px';
 }
 </script>
+
+<!-- About modal -->
+<div id="aboutOverlay" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.7);backdrop-filter:blur(8px);align-items:center;justify-content:center">
+  <div style="background:#1e293b;border:1px solid rgba(79,70,229,0.3);border-radius:14px;padding:28px 32px;max-width:680px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 12px 40px rgba(15,23,42,0.4);position:relative">
+    <button onclick="document.getElementById('aboutOverlay').style.display='none'" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;line-height:1">×</button>
+    <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:16px">About — Feature Checklist</div>
+    <pre style="font-size:11.5px;color:#cbd5e1;line-height:1.7;white-space:pre-wrap;font-family:'Inter',system-ui,sans-serif;margin:0">Improvement:
+1.When undo is done it refresh screen which does not look good.
+
+2.Can we have auto suggestion when moving shapes in canavas that now shapes aligns with straight lines or other shapes, like we have on Canva website, dont know what this feature is called but it is good to have feature.
+
+
+Shapes: WORKING
+1.Check if it hides and comes back when clicked on it.
+2.Check if all Shapes can be dragged on canvas
+3.We should be able to drag shapes around on canvas
+4.we should be able to change size of all shapes except Notes Box
+5.We should be able to delete Shapes from canvas
+
+Lines: WORKING
+1.All lines we should be able to drag to canvas
+2.We should be able to change line width and its colour
+3.For Curved line we should be able to Mirror it
+4.For Arc line we should be able to Flip arc direction
+
+Undo: WORKING
+1.Check last item delete comes backs or not
+2.Check last 2 items comes back or not
+3.Check When whole canvas is cleared it comes back or not
+
+Clear All: WORKING
+1.Check if whole canvas is wiped out or not
+
+Expand all notes:
+1.check it this works or not, Only for Notes Box when MD is selected and canvas is locked, expand is disabled
+
+Collapse all notes:
+1.Check if this works or not, Only for Notes Box when MD is selected and canvas is locked, collapse is disabled
+
+Lock/Unlock canvas:
+1.When canvas is locked all linked lines should be hidden from Notes Box to element
+2.When canvas is locked and you double click on lines or topic names if elements are linked to it, it should be visible
+3.When canvas is locked and MD is was selected before, then Expand collapse of Notes button should be hidden and we should be able to read MD content by double clicking on topic name, when we double click full screen MD content should be visible.
+4.When canvas is locked, Shapes panel should be hidden
+5.When canvas is locked and MD was selected before, Expand all should not work for that particular Notes Box
+6.When canvas is locked Clear Canvas should be disabled
+7.When canvas is locked Undo should be disabled
+8.When canvas is locked Zoom should keep working
+9.When canvas is locked link, MD, should be hidden from topic name place
+10.When canvas is locked, link should be hidden from notes points
+11.When canvas is locked, We should not be able to edit points notes or topic names of Notes Box
+
+Download as Image:
+1.Check if image got downloaded is correct or not
+2.Watermark should be there
+
+Download HTML:
+1.Check if you are able to download HTML file of the elements present in canvas
+2.Check if everything gets loaded using that downloaded html
+3.Check whatever feature was there in locked canvas is present in this HTML + some other constraints which is already present(check)
+4.When we download HTML, we are asked option: Social or Dev, if we select Social website heading is Revision Bhai FlowChat Notes, if we select Dev, Website heading is Dev Notes
+
+Save Project:
+1.check if all unlocked canvas items gets saved as JSON file
+
+Load Project:
+1.Check if you are able to load JSON file back to unlocked canvas with everything retained.
+
+Present:
+1.Check if you are able to go to present screen
+2.You should be able to return back usinf ESC
+
+Zoom:
+1.You Should be able to Zoom in
+2.You should be able to zoon out
+3.You should be able to Reset Zoom
+4.Zoom position should always be fixed irespective of canvas size
+
+General Things:
+1.Auto Expand canvas size when shapes place near edges
+2.Auto Shrink canvas size when shapes are removed
+
+Notes Box:
+1.We should be able to add text to a line
+2.When we click on Enter we should move to next line
+3.We should be able to delete lines
+4.we should be able to link element to lines(first add element to canvas, clock on point for which you want to link element, then click on element, a line will be drawn)
+5.We should be able to drag
+6.We should be able to collapse and expand individual Notex Box
+7.We should be able to change topic name on Notes Box
+8.We should be able to change font and colour of Topic name
+9.We should be able to change font and colour of notes points(for changing notes points drag the mouse and select whole text then option will come)
+10.When Notes Box is collapsed then lines should auto expend and shrink
+11.We should be able to Add MD notes directly to Notes Box, we can click on MD to turn on MD and click on MD again to turn off MD
+12.We are able to add both Notes points and MD content together on Notes Box, not needed but still present.
+13.We should be able to link Notes topic name also to element
+
+Elements:
+1.Direct paste is supported for jpg, png, gif, etc
+2.We should be able to adjust size of element inserted
+3.We should be able to drag element on canvas
+
+Core Idea:
+1.Unlock canvas is to build what you want things to be
+2.Lock canvas is you can see how things look in the end
+3.We are not going to work on Main website, but download HTML code of our locked canvas and that is our final product.
+4.For dev Notes, we are not going to use Images, it will all be either points or MD
+5.For Social Science we will have only points and elements
+6.Share PNG with students not HTML to play with</pre>
+  </div>
+</div>
 
 <!-- Download type modal -->
 <div id="downloadTypeOverlay" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.6);backdrop-filter:blur(8px);align-items:center;justify-content:center">
