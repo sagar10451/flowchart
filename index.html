@@ -98,7 +98,7 @@ svg#connections { position:absolute; top:0; left:0; pointer-events:none; z-index
 .shape-cylinder { background:rgba(239,68,68,0.08); border:2px solid #ef4444; border-radius:50%/15%; color:#991b1b; box-shadow:var(--shadow-sm); }
 
 /* Notes Box */
-.shape-notesbox { background:linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%); border:2px solid rgba(139,92,246,0.35); border-radius:var(--radius-lg); color:var(--text); box-shadow:0 4px 16px rgba(139,92,246,0.18), 0 2px 4px rgba(15,23,42,0.06); display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; padding:0; backdrop-filter:blur(8px); }
+.shape-notesbox { background:linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%); border:2px solid rgba(139,92,246,0.35); border-radius:var(--radius-lg); color:var(--text); box-shadow:0 4px 16px rgba(139,92,246,0.18), 0 2px 4px rgba(15,23,42,0.06); display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; padding:0; backdrop-filter:blur(8px); width:fit-content; }
 .shape-notesbox .nb-header { padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid rgba(139,92,246,0.18); min-height:50px; cursor:move; background:linear-gradient(to bottom, rgba(139,92,246,0.08), transparent); }
 .shape-notesbox .nb-header .label { flex:1; padding:4px 8px; font-size:14px; font-weight:700; color:#6b21a8; }
 .shape-notesbox .nb-toggle { width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:var(--radius-sm); transition:all .25s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink:0; margin-left:6px; background:rgba(139,92,246,0.12); border:1.5px solid rgba(139,92,246,0.3); color:#7c3aed; }
@@ -120,7 +120,7 @@ svg#connections { position:absolute; top:0; left:0; pointer-events:none; z-index
 .note-item { display:flex; align-items:flex-start; gap:10px; padding:6px 8px; border-radius:var(--radius-sm); transition:all .2s cubic-bezier(0.4, 0, 0.2, 1); }
 .note-item:hover { background:rgba(139,92,246,0.12); transform:translateX(2px); }
 .note-bullet { color:#7c3aed; font-size:16px; line-height:1.6; flex-shrink:0; user-select:none; margin-top:1px; font-weight:700; }
-.note-text-input { flex:1; font-size:13px; color:#1e293b; background:none; border:none; outline:none; font-family:'Inter',system-ui,-apple-system,sans-serif; padding:2px 0; resize:none; overflow:hidden; line-height:1.6; min-height:20px; white-space:pre-wrap; word-break:break-word; }
+.note-text-input { flex:1; font-size:13px; color:#1e293b; background:none; border:none; outline:none; font-family:'Inter',system-ui,-apple-system,sans-serif; padding:2px 0; resize:none; line-height:1.6; min-height:20px; white-space:nowrap; }
 .note-text-input:empty::before { content:attr(data-placeholder); color:#94a3b8; font-style:italic; pointer-events:none; }
 
 /* Format bar */
@@ -175,6 +175,7 @@ svg#connections { position:absolute; top:0; left:0; pointer-events:none; z-index
 
 
 /* Presentation mode */
+body.canvas-locked .palette{display:none}
 body.presentation-mode header{display:none}body.presentation-mode .palette{display:none}body.presentation-mode .zoom-controls{display:flex}body.presentation-mode .delete-hint{display:none}body.presentation-mode .shape{cursor:default}body.presentation-mode .port{display:none}body.presentation-mode .resize-handle{display:none}body.presentation-mode .note-del{display:none}body.presentation-mode .note-link-btn{display:none}body.presentation-mode .nb-header-link-btn{display:none}body.presentation-mode .nb-md-toggle{display:none}body.presentation-mode .note-text-input{pointer-events:none}body.presentation-mode .line-endpoint{display:none}body.presentation-mode .nb-header{cursor:default}body.presentation-mode .nb-header .label{pointer-events:none}body.presentation-mode .nb-format-bar{display:none}body.presentation-mode .canvas-wrap{top:0}
 
 /* Note link button */
@@ -441,6 +442,7 @@ function saveUndoState() {
   if (undoStack.length > MAX_UNDO) undoStack.shift();
 }
 function undoAction() {
+  if (canvasLocked) return;
   if (undoStack.length === 0) { showToast('Nothing to undo'); return; }
   const state = undoStack.pop();
   shapes = state.shapes;
@@ -627,7 +629,7 @@ function addShape(type, x, y) {
   const def = shapeDefaults[type];
   const shape = {
     id, type, x, y, w: def.w, h: def.h, label: def.label,
-    fontColor: type === 'notesbox' ? '#6b21a8' : '#e2e8f0', fontSize: type === 'notesbox' ? 15 : 13,
+    fontColor: '#6b21a8', fontSize: type === 'notesbox' ? 15 : 13,
     notes: type === 'notesbox' ? [{ text: '' }] : [],
     notesExpanded: type === 'notesbox' ? true : false,
     baseW: def.w,
@@ -763,7 +765,7 @@ function renderNotesBox(s, el) {
   header.className = 'nb-header';
   const label = document.createElement('div');
   label.className = 'label';
-  label.contentEditable = true;
+  label.contentEditable = canvasLocked ? 'false' : 'true';
   label.innerHTML = s.label;
   label.style.color = s.fontColor;
   label.style.fontSize = s.fontSize + 'px';
@@ -828,7 +830,10 @@ function renderNotesBox(s, el) {
 
   const notesDiv = document.createElement('div');
   notesDiv.className = 'nb-notes';
-  if (s.mdMode) {
+  const hasContent = s.mdMode ? !!s.mdContent : (s.notes && s.notes.some(n => n.text && n.text.replace(/<[^>]*>/g,'').trim()));
+  if (canvasLocked && (!hasContent || s.mdMode)) {
+    notesDiv.style.display = 'none';
+  } else if (s.mdMode) {
     renderMdContent(s, notesDiv);
   } else {
     renderNotesContent(s, notesDiv);
@@ -955,19 +960,25 @@ function renderNotesContent(s, container) {
       const el = document.getElementById(s.id);
       if (!el) return;
       const maxW = Math.round(s.baseW * 1.5);
-      let needed = s.baseW;
-      const measure = document.createElement('canvas').getContext('2d');
-      measure.font = '12px "Inter", system-ui, sans-serif';
-      for (const n of s.notes) {
-        const plainText = n.text ? n.text.replace(/<[^>]*>/g, '') : '';
-        const tw = measure.measureText(plainText).width + 100;
-        if (tw > needed) needed = tw;
-      }
-      const newW = Math.round(Math.min(maxW, Math.max(s.baseW, needed)));
+      const tempSpan = document.createElement('span');
+      tempSpan.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:13px;font-family:Inter,system-ui,sans-serif;';
+      tempSpan.textContent = inp.textContent || 'a';
+      document.body.appendChild(tempSpan);
+      const textW = tempSpan.offsetWidth + 100;
+      document.body.removeChild(tempSpan);
+      const newW = Math.round(Math.min(maxW, Math.max(s.baseW, textW)));
       if (newW !== s.w) {
         s.w = newW;
         el.style.width = newW + 'px';
         updateSnappedLines(s.id); drawConnections();
+      }
+      if (textW >= maxW) {
+        inp.style.whiteSpace = 'pre-wrap';
+        inp.style.wordWrap = 'break-word';
+        inp.style.maxWidth = (maxW - 80) + 'px';
+      } else {
+        inp.style.whiteSpace = 'nowrap';
+        inp.style.maxWidth = 'none';
       }
     };
     inp.addEventListener('input', () => { note.text = inp.innerHTML; autoWidth(); generateCode(); refreshNotesBoxLines(s.id); });
@@ -1350,6 +1361,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && noteLinkMode) { cancelNoteLink(); }
 });
 function clearCanvas() {
+  if (canvasLocked) return;
   saveUndoState();
   shapes = []; lineShapes = []; connections = []; noteLinks = []; shapeIdCounter = 0;
   canvas.innerHTML = ''; svgLayer.innerHTML = '';
@@ -2094,13 +2106,13 @@ function toggleNoteLinkedImages(shapeId, noteIndex) {
 function togglePalette() { document.getElementById('palette').classList.toggle('collapsed'); }
 
 function expandAllNotes() {
-  shapes.filter(s => s.type === 'notesbox' && !s.notesExpanded).forEach(s => {
+  shapes.filter(s => s.type === 'notesbox' && !s.notesExpanded && !(canvasLocked && s.mdMode)).forEach(s => {
     s.notesExpanded = true; const el = document.getElementById(s.id); if (el) el.classList.remove('collapsed');
   });
   setTimeout(() => { shapes.filter(s => s.type === 'notesbox').forEach(s => { updateSnappedLines(s.id); }); drawConnections(); drawNoteLinks(); expandCanvasToFit(); generateCode(); }, 10);
 }
 function collapseAllNotes() {
-  shapes.filter(s => s.type === 'notesbox' && s.notesExpanded).forEach(s => {
+  shapes.filter(s => s.type === 'notesbox' && s.notesExpanded && !(canvasLocked && s.mdMode)).forEach(s => {
     s.notesExpanded = false; const el = document.getElementById(s.id); if (el) el.classList.add('collapsed');
   });
   setTimeout(() => { shapes.filter(s => s.type === 'notesbox').forEach(s => { updateSnappedLines(s.id); }); drawConnections(); drawNoteLinks(); expandCanvasToFit(); generateCode(); }, 10);
