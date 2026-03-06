@@ -777,7 +777,26 @@ function renderNotesBox(s, el) {
   label.innerHTML = s.label;
   label.style.color = s.fontColor;
   label.style.fontSize = s.fontSize + 'px';
-  label.addEventListener('input', () => { s.label = label.innerHTML; generateCode(); });
+  label.style.whiteSpace = 'nowrap';
+  label.addEventListener('input', () => {
+    s.label = label.innerHTML;
+    const el = document.getElementById(s.id);
+    if (el) {
+      const tempSpan = document.createElement('span');
+      tempSpan.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:' + s.fontSize + 'px;font-weight:700;font-family:Inter,system-ui,sans-serif;';
+      tempSpan.textContent = label.textContent || 'a';
+      document.body.appendChild(tempSpan);
+      const labelW = Math.round(tempSpan.offsetWidth + 130);
+      const noteInputs = el.querySelectorAll('.note-text-input');
+      let maxNoteW = 0;
+      noteInputs.forEach(ni => { tempSpan.style.fontSize = '13px'; tempSpan.style.fontWeight = 'normal'; tempSpan.textContent = ni.textContent || 'a'; maxNoteW = Math.max(maxNoteW, tempSpan.offsetWidth + 140); });
+      document.body.removeChild(tempSpan);
+      const maxNoteWCapped = Math.min(Math.round(s.baseW * 1.5), maxNoteW);
+      const newW = Math.max(s.baseW, labelW, maxNoteWCapped);
+      if (newW !== s.w) { s.w = newW; el.style.width = newW + 'px'; updateSnappedLines(s.id); drawConnections(); }
+    }
+    generateCode();
+  });
   label.addEventListener('mousedown', e => e.stopPropagation());
   label.addEventListener('click', e => e.stopPropagation());
   label.addEventListener('focus', e => e.stopPropagation());
@@ -863,6 +882,7 @@ function renderNotesBox(s, el) {
     renderMdContent(s, notesDiv);
   } else {
     renderNotesContent(s, notesDiv);
+    const inp0 = notesDiv.querySelector('.note-text-input'); if (inp0) inp0.dispatchEvent(new Event('input'));
   }
   el.appendChild(notesDiv);
 
@@ -985,26 +1005,31 @@ function renderNotesContent(s, container) {
       if (s.type !== 'notesbox') return;
       const el = document.getElementById(s.id);
       if (!el) return;
-      const maxW = Math.round(s.baseW * 1.5);
       const tempSpan = document.createElement('span');
-      tempSpan.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:13px;font-family:Inter,system-ui,sans-serif;';
-      tempSpan.textContent = inp.textContent || 'a';
+      const labelEl = el.querySelector('.nb-header .label');
+      tempSpan.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:' + s.fontSize + 'px;font-weight:700;font-family:Inter,system-ui,sans-serif;';
       document.body.appendChild(tempSpan);
-      const textW = tempSpan.offsetWidth + 100;
+      tempSpan.textContent = labelEl ? (labelEl.textContent || 'a') : 'a';
+      const labelDrivenW = Math.round(tempSpan.offsetWidth + 130);
       document.body.removeChild(tempSpan);
-      const newW = Math.round(Math.min(maxW, Math.max(s.baseW, textW)));
+      const maxW = Math.max(Math.round(s.baseW * 1.5), labelDrivenW);
+      tempSpan.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:13px;font-family:Inter,system-ui,sans-serif;';
+      document.body.appendChild(tempSpan);
+      const allInputs = container.querySelectorAll('.note-text-input');
+      let maxTextW = 0;
+      allInputs.forEach(ni => { tempSpan.textContent = ni.textContent || 'a'; maxTextW = Math.max(maxTextW, tempSpan.offsetWidth + 140); });
+      document.body.removeChild(tempSpan);
+      const textW = maxTextW;
+      const newW = Math.round(Math.max(s.baseW, labelDrivenW, Math.min(maxW, textW)));
       if (newW !== s.w) {
         s.w = newW;
         el.style.width = newW + 'px';
         updateSnappedLines(s.id); drawConnections();
       }
       if (textW >= maxW) {
-        inp.style.whiteSpace = 'pre-wrap';
-        inp.style.wordWrap = 'break-word';
-        inp.style.maxWidth = (maxW - 80) + 'px';
+        allInputs.forEach(ni => { ni.style.whiteSpace = 'pre-wrap'; ni.style.wordWrap = 'break-word'; ni.style.maxWidth = (maxW - 80) + 'px'; });
       } else {
-        inp.style.whiteSpace = 'nowrap';
-        inp.style.maxWidth = 'none';
+        allInputs.forEach(ni => { ni.style.whiteSpace = 'nowrap'; ni.style.maxWidth = 'none'; });
       }
     };
     inp.addEventListener('input', () => { note.text = inp.innerHTML; autoWidth(); generateCode(); refreshNotesBoxLines(s.id); });
@@ -1016,6 +1041,7 @@ function renderNotesContent(s, container) {
         s.notes.splice(i + 1, 0, { text: '' });
         renderNotesContent(s, container);
         const inputs = container.querySelectorAll('.note-text-input');
+        if (inputs[0]) inputs[0].dispatchEvent(new Event('input'));
         if (inputs[i + 1]) inputs[i + 1].focus();
         refreshNotesBoxLines(s.id);
       }
@@ -1024,6 +1050,7 @@ function renderNotesContent(s, container) {
         s.notes.splice(i, 1);
         renderNotesContent(s, container);
         const inputs = container.querySelectorAll('.note-text-input');
+        if (inputs[0]) inputs[0].dispatchEvent(new Event('input'));
         const fi = Math.max(0, i - 1);
         if (inputs[fi]) { inputs[fi].focus(); placeCaretAtEnd(inputs[fi]); }
         refreshNotesBoxLines(s.id);
