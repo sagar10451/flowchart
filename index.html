@@ -72,6 +72,15 @@
         #canvas { position:relative; transform-origin:0 0; min-width:100%; min-height:100%; user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; }
         svg#connections { position:absolute; top:0; left:0; pointer-events:none; z-index:1; }
         .snap-guide { stroke:#f43f5e; stroke-width:1px; stroke-dasharray:4 3; opacity:0.85; }
+        .hier-badge{position:absolute;width:20px;height:20px;border-radius:50%;background:#1e293b;border:1.5px solid rgba(139,92,246,0.5);color:rgba(165,180,252,0.8);font-size:11px;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:20;pointer-events:all;user-select:none;transition:all .2s}
+        .hier-badge:hover{background:#312e81;border-color:#818cf8;color:#fff}
+        .hier-badge.hier-active{background:#4f46e5;border-color:#818cf8;color:#fff}
+        body.canvas-locked .hier-badge{display:none!important}
+        .hier-popup{position:fixed;z-index:9999;background:#1e293b;border:1px solid rgba(79,70,229,0.4);border-radius:10px;padding:12px 14px;box-shadow:0 8px 32px rgba(0,0,0,0.4);min-width:220px}
+        .hier-popup-title{font-size:11px;font-weight:700;color:rgba(165,180,252,0.6);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+        .hier-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px;color:#e2e8f0;transition:background .15s}
+        .hier-opt:hover{background:rgba(79,70,229,0.15)}
+        .hier-opt.selected{background:rgba(79,70,229,0.25);color:#a5b4fc}
 
         /* ===== ZOOM ===== */
         .zoom-controls { position:fixed; bottom:16px; left:16px; z-index:150; display:flex; gap:2px; align-items:center; background:var(--palette-bg); border:1px solid rgba(79,70,229,0.2); border-radius:var(--radius-md); padding:4px 6px; box-shadow:0 4px 16px rgba(15,23,42,0.25); }
@@ -647,7 +656,6 @@
         notesExpanded: type === 'notesbox' ? true : false,
         baseW: def.w,
         mdMode: false, mdContent: '',
-        isTopic: true,
       };
       shapes.push(shape);
       renderShape(shape);
@@ -793,6 +801,36 @@
     }
 
     // ---- NOTES BOX RENDERING ----
+    function openHierarchyPopup(ln, badge) {
+      document.querySelectorAll('.hier-popup').forEach(p => p.remove());
+      const sStart = shapes.find(s => s.id === ln.snapStart?.shapeId);
+      const sEnd = shapes.find(s => s.id === ln.snapEnd?.shapeId);
+      if (!sStart || !sEnd) return;
+      const nameA = (sStart.label || 'Box A').replace(/<[^>]*>/g,'').trim().slice(0,24);
+      const nameB = (sEnd.label || 'Box B').replace(/<[^>]*>/g,'').trim().slice(0,24);
+      const popup = document.createElement('div');
+      popup.className = 'hier-popup';
+      const rect = badge.getBoundingClientRect();
+      popup.style.left = (rect.right + 8) + 'px';
+      popup.style.top = rect.top + 'px';
+      const opts = [
+        { label: 'No relation', val: null },
+        { label: `"${nameA}" → parent of → "${nameB}"`, val: { parentId: sStart.id, childId: sEnd.id } },
+        { label: `"${nameB}" → parent of → "${nameA}"`, val: { parentId: sEnd.id, childId: sStart.id } },
+      ];
+      const title = document.createElement('div'); title.className = 'hier-popup-title'; title.textContent = 'Set Hierarchy'; popup.appendChild(title);
+      opts.forEach(opt => {
+        const div = document.createElement('div'); div.className = 'hier-opt';
+        const isCurrent = ln.hierarchy === opt.val || (ln.hierarchy && opt.val && ln.hierarchy.parentId === opt.val.parentId && ln.hierarchy.childId === opt.val.childId);
+        if (isCurrent) div.classList.add('selected');
+        const dot = document.createElement('span'); dot.style.cssText = 'width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor;flex-shrink:0'; if (isCurrent) dot.style.background = 'currentColor';
+        div.appendChild(dot); div.appendChild(document.createTextNode(opt.label));
+        div.addEventListener('click', () => { ln.hierarchy = opt.val; const w = document.getElementById(ln.id); if (w) { const hb = w.querySelector('.hier-badge'); if (hb) hb.classList.toggle('hier-active', !!opt.val); } popup.remove(); generateCode(); });
+        popup.appendChild(div);
+      });
+      document.body.appendChild(popup);
+      setTimeout(() => { document.addEventListener('mousedown', function close(e) { if (!popup.contains(e.target)) { popup.remove(); document.removeEventListener('mousedown', close); } }); }, 0);
+    }
     function renderNotesBox(s, el) {
       el.style.height = 'auto';
       if (!s.notesExpanded) el.classList.add('collapsed');
@@ -878,24 +916,6 @@
       });
       mdToggle.addEventListener('mousedown', e => e.stopPropagation());
       header.appendChild(mdToggle);
-
-      // Topic/Sub toggle (hidden when locked via CSS)
-      if (s.isTopic === undefined) s.isTopic = true;
-      const topicToggle = document.createElement('div');
-      topicToggle.className = 'nb-topic-toggle' + (s.isTopic ? '' : ' is-sub');
-      topicToggle.title = s.isTopic ? 'Mark as Sub Topic' : 'Mark as Topic';
-      topicToggle.textContent = s.isTopic ? 'Topic' : 'Sub';
-      topicToggle.addEventListener('click', e => {
-        e.stopPropagation();
-        if (canvasLocked) return;
-        s.isTopic = !s.isTopic;
-        topicToggle.textContent = s.isTopic ? 'Topic' : 'Sub';
-        topicToggle.title = s.isTopic ? 'Mark as Sub Topic' : 'Mark as Topic';
-        topicToggle.classList.toggle('is-sub', !s.isTopic);
-        generateCode();
-      });
-      topicToggle.addEventListener('mousedown', e => e.stopPropagation());
-      header.appendChild(topicToggle);
 
       const toggle = document.createElement('div');
       toggle.className = 'nb-toggle';
@@ -1229,7 +1249,7 @@
       saveUndoState();
       const id = 'l' + (++shapeIdCounter);
       const def = lineDefaults[type];
-      const ln = { id, type, x1, y1, x2, y2, color: def.color, dash: def.dash, strokeWidth: 2, mirrored: false, snapStart: null, snapEnd: null };
+      const ln = { id, type, x1, y1, x2, y2, color: def.color, dash: def.dash, strokeWidth: 2, mirrored: false, snapStart: null, snapEnd: null, hierarchy: null };
       lineShapes.push(ln); renderLine(ln); selectItem(id, 'line'); generateCode(); expandCanvasToFit();
     }
     function renderLine(ln) {
@@ -1251,7 +1271,15 @@
       ep1.addEventListener('mousedown', e => { e.stopPropagation(); selectItem(ln.id, 'line'); draggingEndpoint = { line: ln, which: 'start' }; });
       const ep2 = document.createElement('div'); ep2.className = 'line-endpoint';
       ep2.addEventListener('mousedown', e => { e.stopPropagation(); selectItem(ln.id, 'line'); draggingEndpoint = { line: ln, which: 'end' }; });
-      wrap.appendChild(ep1); wrap.appendChild(ep2); canvas.appendChild(wrap); updateLineEl(ln);
+      wrap.appendChild(ep1); wrap.appendChild(ep2);
+      const hbadge = document.createElement('div');
+      hbadge.className = 'hier-badge';
+      hbadge.textContent = '⇅';
+      hbadge.title = 'Set Hierarchy';
+      hbadge.addEventListener('mousedown', e => e.stopPropagation());
+      hbadge.addEventListener('click', e => { e.stopPropagation(); if (!canvasLocked) openHierarchyPopup(ln, hbadge); });
+      wrap.appendChild(hbadge);
+      canvas.appendChild(wrap); updateLineEl(ln);
     }
 
     function buildArcPath(x1, y1, x2, y2, direction) {
@@ -1289,6 +1317,14 @@
       }
       eps[0].style.left = (ln.x1 - 7) + 'px'; eps[0].style.top = (ln.y1 - 7) + 'px';
       eps[1].style.left = (ln.x2 - 7) + 'px'; eps[1].style.top = (ln.y2 - 7) + 'px';
+      const hbadge = wrap.querySelector('.hier-badge');
+      if (hbadge) {
+        const mx = (ln.x1 + ln.x2) / 2, my = (ln.y1 + ln.y2) / 2;
+        hbadge.style.left = (mx - 10) + 'px'; hbadge.style.top = (my - 10) + 'px';
+        const bothNB = ln.snapStart && ln.snapEnd && shapes.find(s => s.id === ln.snapStart.shapeId && s.type === 'notesbox') && shapes.find(s => s.id === ln.snapEnd.shapeId && s.type === 'notesbox');
+        hbadge.style.display = bothNB ? 'flex' : 'none';
+        hbadge.classList.toggle('hier-active', !!ln.hierarchy);
+      }
     }
 
 
@@ -1624,6 +1660,7 @@
     .shape{position:absolute;display:flex;align-items:center;justify-content:center;z-index:10}
     .shape .label{font-size:13px;font-weight:600;text-align:center;padding:8px 16px;outline:none;width:100%;background:transparent;border:none;color:var(--text)}
     .shape-rect{background:rgba(59,130,246,.08);border:2px solid #3b82f6;border-radius:var(--radius-lg)}
+    .shape-rect.status-done{border-color:#10b981 !important;background:linear-gradient(135deg,rgba(209,250,229,0.7) 0%,rgba(167,243,208,0.5) 100%) !important}
     .shape-rounded{background:rgba(16,185,129,.08);border:2px solid #10b981;border-radius:32px}
     .shape-diamond{background:rgba(245,158,11,.08);border:2px solid #f59e0b;transform:rotate(45deg);border-radius:8px}
     .shape-diamond .label{transform:rotate(-45deg)}
@@ -1644,7 +1681,7 @@
     .shape-notesbox.md-active-box .nb-toggle{display:none}
     .shape-notesbox.status-done{border-color:#10b981 !important;background:linear-gradient(135deg,rgba(209,250,229,0.7) 0%,rgba(167,243,208,0.5) 100%) !important}
     .shape-notesbox.status-in-progress{border-color:#f59e0b !important;background:linear-gradient(135deg,rgba(254,243,199,0.7) 0%,rgba(253,230,138,0.5) 100%) !important}
-    .progress-counter{position:fixed;top:80px;right:20px;z-index:200;background:rgba(15,23,42,0.92);border:1px solid rgba(56,189,248,0.2);border-radius:14px;padding:14px 18px;backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(0,0,0,0.4)}
+    .progress-counter{display:none}
     .progress-counter.pulse{animation:pcPulse 0.5s ease}
     @keyframes pcPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08);box-shadow:0 0 20px rgba(56,189,248,0.35)}}
     .pc-row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:13px;font-weight:600}
@@ -1724,6 +1761,7 @@
         <div class="pc-row pc-prog pc-inactive" id="pcProgRow"><span class="pc-dot"></span><span>In Progress: <span id="pcProgCount">0</span></span></div>
         <button class="pc-reset" onclick="window.resetProgress()">Reset</button>
       </div>
+      <button class="pc-reset" onclick="window.resetProgress()" style="position:fixed;top:80px;right:20px;z-index:200;float:none">↺ Reset</button>
       <div class="md-fullscreen-overlay" id="mdFullscreenOverlay">
         <div class="md-fullscreen-content">
           <div class="md-fullscreen-header">
@@ -1860,7 +1898,7 @@
         var LS_KEY = 'rb_progress_${pageTitle.replace(/\s+/g, "_")}';
         function saveProgress(){
           var data = {};
-          shapes.filter(function(s){ return s.type==='notesbox' && s.isTopic !== false && s._status; }).forEach(function(s){ data[s.id] = s._status; });
+          shapes.filter(function(s){ return s.type==='notesbox' && s._status; }).forEach(function(s){ data[s.id] = s._status; });
           try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch(e){}
         }
         function loadProgress(){
@@ -1869,18 +1907,19 @@
             if (!raw) return;
             var data = JSON.parse(raw);
             shapes.forEach(function(s){
-              if (s.type==='notesbox' && s.isTopic !== false && data[s.id]) {
+              if (s.type==='notesbox' && data[s.id]) {
                 s._status = data[s.id];
                 var el = document.getElementById(s.id);
                 if (el) { el.classList.toggle('status-done', s._status==='done'); el.classList.toggle('status-in-progress', s._status==='in-progress'); }
               }
             });
             updateProgressCounter();
+            checkProcessShape();
           } catch(e){}
         }
         function updateProgressCounter(){
-          var done = shapes.filter(function(s){ return s.type==='notesbox' && s.isTopic !== false && s._status==='done'; }).length;
-          var prog = shapes.filter(function(s){ return s.type==='notesbox' && s.isTopic !== false && s._status==='in-progress'; }).length;
+          var done = shapes.filter(function(s){ return s.type==='notesbox' && s._status==='done'; }).length;
+          var prog = shapes.filter(function(s){ return s.type==='notesbox' && s._status==='in-progress'; }).length;
           document.getElementById('pcDoneCount').textContent = done;
           document.getElementById('pcProgCount').textContent = prog;
           var doneRow = document.getElementById('pcDoneRow');
@@ -1900,12 +1939,45 @@
           btns.forEach(function(b){
             b.classList.toggle('active-btn', (b.classList.contains('done-btn') && status==='done') || (b.classList.contains('prog-btn') && status==='in-progress'));
           });
+          propagateHierarchy(s.id);
           updateProgressCounter();
           saveProgress();
         };
+        function propagateHierarchy(changedId) {
+          var parentLines = lineShapes.filter(function(ln){ return ln.hierarchy && ln.hierarchy.childId === changedId; });
+          parentLines.forEach(function(ln) {
+            var parentId = ln.hierarchy.parentId;
+            var childLines = lineShapes.filter(function(l){ return l.hierarchy && l.hierarchy.parentId === parentId; });
+            var allDone = childLines.length > 0 && childLines.every(function(l){ var cs = shapes.find(function(s){ return s.id === l.hierarchy.childId; }); return cs && cs._status === 'done'; });
+            var parentShape = shapes.find(function(s){ return s.id === parentId; });
+            var parentEl = document.getElementById(parentId);
+            if (!parentShape || !parentEl) return;
+            if (allDone && parentShape._status !== 'done') {
+              parentShape._status = 'done';
+              parentEl.classList.add('status-done'); parentEl.classList.remove('status-in-progress');
+              parentEl.querySelectorAll('.nb-prog-btn').forEach(function(b){ b.classList.toggle('active-btn', b.classList.contains('done-btn')); });
+              propagateHierarchy(parentId);
+            } else if (!allDone && parentShape._status === 'done') {
+              parentShape._status = null;
+              parentEl.classList.remove('status-done','status-in-progress');
+              parentEl.querySelectorAll('.nb-prog-btn').forEach(function(b){ b.classList.remove('active-btn'); });
+              propagateHierarchy(parentId);
+            }
+          });
+          checkProcessShape();
+        }
+        function checkProcessShape() {
+          var allNB = shapes.filter(function(s){ return s.type === 'notesbox'; });
+          var allDone = allNB.length > 0 && allNB.every(function(s){ return s._status === 'done'; });
+          var proc = shapes.find(function(s){ return s.isStart; });
+          if (!proc) return;
+          var procEl = document.getElementById(proc.id);
+          if (!procEl) return;
+          procEl.classList.toggle('status-done', allDone);
+        }
         window.resetProgress = function(){
           shapes.forEach(function(s){
-            if (s.type==='notesbox' && s.isTopic !== false) {
+            if (s.type==='notesbox') {
               s._status = null;
               var el = document.getElementById(s.id);
               if (el) {
@@ -1915,6 +1987,7 @@
             }
           });
           updateProgressCounter();
+          checkProcessShape();
           try { localStorage.removeItem(LS_KEY); } catch(e){}
         };
         function renderNotesBox(s, el){
@@ -1946,8 +2019,7 @@
             setTimeout(function(){ updateAllSnappedLines(); drawConnections(); }, 50);
           });
           if (hasContent && !s.mdMode) header.appendChild(toggle);
-          if (s.isTopic !== false) {
-            var progBtns = document.createElement('div');
+          var progBtns = document.createElement('div');
             progBtns.className = s.mdMode ? 'nb-progress-btns-inline' : 'nb-status-bar';
             var doneBtn = document.createElement('button');
             doneBtn.className = 'nb-prog-btn done-btn' + (s._status === 'done' ? ' active-btn' : '');
@@ -1960,7 +2032,6 @@
             progBtns.appendChild(doneBtn);
             progBtns.appendChild(progBtn);
             if (s.mdMode && hasContent) header.appendChild(progBtns);
-          }
           if (s.mdMode && hasContent) {
             el.style.position = 'relative';
             var hint = document.createElement('div');
@@ -1996,7 +2067,7 @@
             });
           }
           el.appendChild(notesDiv);
-          if (s.isTopic !== false && progBtns && hasContent && !s.mdMode) el.appendChild(progBtns);
+          if (progBtns && hasContent && !s.mdMode) el.appendChild(progBtns);
         }
         function renderShape(s){
           var el = document.createElement('div');
