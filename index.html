@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revision Bhai's Notes and FlowChart</title>
+    <title>FlowChart Maker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
         header { display:flex; align-items:center; gap:12px; padding:0 20px; height:52px; min-height:52px; background:var(--header-bg); border-bottom:1px solid rgba(79,70,229,0.2); z-index:100; box-shadow:0 2px 8px rgba(15,23,42,0.15); }
         .logo { display:flex; align-items:center; gap:10px; margin-right:8px; }
         .logo-icon { width:28px; height:28px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; color:#fff; }
-        .logo h1 { font-size:15px; font-weight:700; color:#f1f5f9; letter-spacing:-0.3px; white-space:nowrap; font-family:'Playfair Display',serif; }
+        .logo h1 { font-size:18px; font-weight:700; color:#f1f5f9; letter-spacing:-0.3px; white-space:nowrap; font-family:'Playfair Display',serif; }
         .toolbar-sep { width:1px; height:24px; background:rgba(255,255,255,0.1); flex-shrink:0; }
         .toolbar-group { display:flex; gap:2px; align-items:center; }
         .tb { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:34px; padding:0 12px; border:1px solid transparent; border-radius:var(--radius-sm); background:transparent; color:rgba(241,245,249,0.7); cursor:pointer; font:500 12px/1 'Inter',system-ui,sans-serif; transition:all var(--transition); white-space:nowrap; }
@@ -225,6 +225,23 @@
         .nb-md-toggle:hover { background:rgba(139,92,246,0.2); border-color:rgba(139,92,246,0.4); transform:scale(1.05); }
         .nb-md-toggle.active { background:linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.1)); border-color:rgba(16,185,129,0.35); color:#059669; box-shadow:0 0 0 3px rgba(16,185,129,0.1); }
         body.canvas-locked .nb-md-toggle { display:none; }
+        .nb-url-toggle { width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:var(--radius-sm); transition:all .25s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink:0; margin-left:6px; background:rgba(16,185,129,0.08); border:1.5px solid rgba(16,185,129,0.25); color:#059669; font-size:13px; user-select:none; }
+        .nb-url-toggle:hover { background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.4); transform:scale(1.05); }
+        .nb-url-toggle.active { background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(16,185,129,0.12)); border-color:rgba(16,185,129,0.5); box-shadow:0 0 0 3px rgba(16,185,129,0.12); }
+        body.canvas-locked .nb-url-toggle { display:none; }
+        .nb-md-inline-toggle { width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:var(--radius-sm); transition:all .25s; flex-shrink:0; margin-left:6px; background:rgba(139,92,246,0.12); border:1.5px solid rgba(139,92,246,0.3); color:#7c3aed; font-size:9px; font-weight:700; font-family:'Inter',system-ui,sans-serif; user-select:none; }
+        .nb-md-inline-toggle:hover { background:rgba(139,92,246,0.2); border-color:rgba(139,92,246,0.4); }
+        .nb-md-inline-toggle.active { background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(16,185,129,0.1)); border-color:rgba(16,185,129,0.35); color:#059669; }
+        body.canvas-locked .nb-md-inline-toggle { display:none; }
+        body.canvas-locked .shape-notesbox.md-inline-box .nb-toggle { display:none; }
+        .nb-url-input { width:100%; padding:4px 8px; font-size:11px; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); outline:none; margin-top:4px; }
+        .nb-url-input:focus { border-color:var(--accent); }
+        body.canvas-locked .nb-url-input { display:none; }
+        body.canvas-locked .shape-notesbox.has-box-url { cursor:pointer; transition:all .2s; }
+        body.canvas-locked .shape-notesbox.has-box-url:hover { border-color:#10b981 !important; box-shadow:0 0 0 3px rgba(16,185,129,0.2), 0 4px 16px rgba(16,185,129,0.15) !important; transform:translateY(-1px); }
+        body.canvas-locked .shape-notesbox.has-box-url .nb-toggle { display:none; }
+        body.canvas-locked .shape-notesbox.has-box-url .nb-status-bar { display:none; }
+        body.canvas-locked .shape-notesbox.has-box-url .nb-progress-btns-inline { display:none; }
         .start-btn{position:absolute;top:4px;right:4px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;border:1px solid rgba(59,130,246,0.4);background:rgba(59,130,246,0.08);color:#3b82f6;cursor:pointer;line-height:1.4;display:none;z-index:5;user-select:none}
         .start-btn.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
         body:not(.canvas-locked) .shape-rect .start-btn{display:block}
@@ -271,7 +288,7 @@
 <header>
     <div class="logo">
         <img src="https://drive.google.com/thumbnail?id=1HSzvXnwTjsamCm3Jw-7oG5sU-Klntc6N&sz=w200" alt="logo" style="width:28px;height:28px;border-radius:8px;object-fit:cover;">
-        <h1>Revision Bhai</h1>
+        <h1>FlowChart Maker</h1>
     </div>
     <div class="toolbar-sep"></div>
     <div class="toolbar-group">
@@ -768,9 +785,12 @@
             e.target.classList.contains('resize-handle') || e.target.classList.contains('note-text-input') ||
             e.target.classList.contains('nb-toggle') || e.target.closest('.nb-toggle') ||
             e.target.classList.contains('nb-md-toggle') || e.target.closest('.nb-md-toggle') ||
+            e.target.classList.contains('nb-url-toggle') || e.target.closest('.nb-url-toggle') ||
+            e.target.classList.contains('nb-md-inline-toggle') || e.target.closest('.nb-md-inline-toggle') ||
             e.target.classList.contains('nb-topic-toggle') || e.target.closest('.nb-topic-toggle') ||
             e.target.classList.contains('nb-header-link-btn') || e.target.closest('.nb-header-link-btn') ||
             e.target.classList.contains('nb-md-textarea') ||
+            e.target.classList.contains('nb-url-input') ||
             e.target.closest('.note-item')) return;
         selectItem(s.id, 'shape');
         draggingShape = s;
@@ -837,9 +857,14 @@
       // Ensure mdMode and mdContent exist (for old saved projects)
       if (s.mdMode === undefined) s.mdMode = false;
       if (s.mdContent === undefined) s.mdContent = '';
+      if (s.mdInline === undefined) s.mdInline = false;
+      if (s.boxUrl === undefined) s.boxUrl = '';
+      if (s.urlMode === undefined) s.urlMode = false;
 
       // Add md-active-box class when mdMode is on
       el.classList.toggle('md-active-box', s.mdMode);
+      el.classList.toggle('md-inline-box', !!(s.mdMode && s.mdInline));
+      el.classList.toggle('has-box-url', !!(canvasLocked ? s.boxUrl : (s.urlMode && s.boxUrl)));
       // Add heading-has-links class when heading has image links
       const headingHasLinks = noteLinks.some(nl => nl.fromShapeId === s.id && nl.noteIndex === -1);
       el.classList.toggle('heading-has-links', headingHasLinks);
@@ -917,6 +942,36 @@
       mdToggle.addEventListener('mousedown', e => e.stopPropagation());
       header.appendChild(mdToggle);
 
+      // URL mode toggle button
+      const urlToggle = document.createElement('div');
+      urlToggle.className = 'nb-url-toggle' + (s.urlMode ? ' active' : '');
+      urlToggle.title = s.urlMode ? 'Disable URL mode' : 'Set URL for this box';
+      urlToggle.textContent = '🔗';
+      urlToggle.addEventListener('click', e => {
+        e.stopPropagation();
+        if (canvasLocked) return;
+        toggleUrlMode(s.id);
+      });
+      urlToggle.addEventListener('mousedown', e => e.stopPropagation());
+      header.appendChild(urlToggle);
+
+      if (s.mdMode) {
+        const inlineToggle = document.createElement('div');
+        inlineToggle.className = 'nb-md-inline-toggle' + (s.mdInline ? ' active' : '');
+        inlineToggle.title = s.mdInline ? 'Disable inline MD' : 'Show MD inline when locked';
+        inlineToggle.textContent = '⊞';
+        inlineToggle.addEventListener('click', e => {
+          e.stopPropagation();
+          if (canvasLocked) return;
+          s.mdInline = !s.mdInline;
+          const el2 = document.getElementById(s.id);
+          if (el2) { el2.innerHTML = ''; renderNotesBox(s, el2); }
+          setTimeout(() => { updateSnappedLines(s.id); drawConnections(); generateCode(); }, 10);
+        });
+        inlineToggle.addEventListener('mousedown', e => e.stopPropagation());
+        header.appendChild(inlineToggle);
+      }
+
       const toggle = document.createElement('div');
       toggle.className = 'nb-toggle';
       toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
@@ -933,8 +988,25 @@
       const notesDiv = document.createElement('div');
       notesDiv.className = 'nb-notes';
       const hasContent = s.mdMode ? !!s.mdContent : (s.notes && s.notes.some(n => n.text && n.text.replace(/<[^>]*>/g,'').trim()));
-      if (canvasLocked && (!hasContent || s.mdMode)) {
+      if (canvasLocked && s.mdMode && s.mdInline && hasContent) {
+        renderMdContent(s, notesDiv);
+      } else if (canvasLocked && (!hasContent || s.mdMode)) {
         notesDiv.style.display = 'none';
+      } else if (s.mdMode && s.mdInline) {
+        const rendered = document.createElement('div');
+        rendered.className = 'nb-md-rendered';
+        rendered.innerHTML = renderMarkdown(s.mdContent);
+        notesDiv.appendChild(rendered);
+      } else if (s.urlMode) {
+        const urlInput = document.createElement('input');
+        urlInput.type = 'url';
+        urlInput.className = 'nb-url-input';
+        urlInput.placeholder = '🔗 Paste URL';
+        urlInput.value = s.boxUrl || '';
+        urlInput.addEventListener('input', () => { s.boxUrl = urlInput.value.trim(); generateCode(); });
+        urlInput.addEventListener('mousedown', e => e.stopPropagation());
+        urlInput.addEventListener('click', e => e.stopPropagation());
+        notesDiv.appendChild(urlInput);
       } else if (s.mdMode) {
         renderMdContent(s, notesDiv);
       } else {
@@ -942,6 +1014,34 @@
         const inp0 = notesDiv.querySelector('.note-text-input'); if (inp0) inp0.dispatchEvent(new Event('input'));
       }
       el.appendChild(notesDiv);
+
+      if (s.mdInline && s.mdMode && !canvasLocked) {
+        ['l','r'].forEach(dir => {
+          const rh = document.createElement('div');
+          rh.className = `resize-handle rh-${dir}`;
+          rh.addEventListener('mousedown', e => {
+            e.stopPropagation();
+            const startX = e.clientX, origW = s.w, origX = s.x;
+            const onMove = mv => {
+              const dx = (mv.clientX - startX) / zoomScale;
+              let nw, nx;
+              if (dir === 'r') { nw = Math.max(s.baseW, origW + dx); nx = origX; }
+              else { nw = Math.max(s.baseW, origW - dx); nx = origX + origW - nw; }
+              s.w = nw; s.x = nx;
+              el.style.width = nw + 'px'; el.style.left = nx + 'px';
+              updateSnappedLines(s.id); drawConnections();
+            };
+            const onUp = () => {
+              document.removeEventListener('mousemove', onMove);
+              document.removeEventListener('mouseup', onUp);
+              generateCode(); expandCanvasToFit();
+            };
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+          });
+          el.appendChild(rh);
+        });
+      }
 
       ['top','bottom','left','right'].forEach(pos => {
         const port = document.createElement('div');
@@ -951,6 +1051,10 @@
         port.addEventListener('mousedown', startConnection);
         el.appendChild(port);
       });
+
+      if (canvasLocked && s.boxUrl) {
+        el.addEventListener('click', e => { e.stopPropagation(); window.open(s.boxUrl, '_blank'); });
+      }
     }
 
 
@@ -960,12 +1064,27 @@
       if (!s || s.type !== 'notesbox') return;
       saveUndoState();
       s.mdMode = !s.mdMode;
+      if (!s.mdMode) s.mdInline = false;
+      if (s.mdMode) s.urlMode = false;
       const el = document.getElementById(shapeId);
       if (!el) return;
       el.innerHTML = '';
       renderNotesBox(s, el);
       setTimeout(() => { updateSnappedLines(shapeId); drawConnections(); drawNoteLinks(); generateCode(); }, 10);
       showToast(s.mdMode ? 'Markdown mode' : 'Bullet notes mode');
+    }
+
+    function toggleUrlMode(shapeId) {
+      const s = shapes.find(sh => sh.id === shapeId);
+      if (!s || s.type !== 'notesbox') return;
+      saveUndoState();
+      s.urlMode = !s.urlMode;
+      if (s.urlMode) { s.mdMode = false; s.mdInline = false; }
+      const el = document.getElementById(shapeId);
+      if (!el) return;
+      el.innerHTML = '';
+      renderNotesBox(s, el);
+      setTimeout(() => { updateSnappedLines(shapeId); drawConnections(); drawNoteLinks(); generateCode(); }, 10);
     }
 
     function renderMdContent(s, container) {
@@ -1620,8 +1739,86 @@
       if (shapes.length === 0 && lineShapes.length === 0) { showToast('Nothing to export'); return; }
       document.getElementById('downloadTypeOverlay').style.display = 'flex';
     }
-    function doDownloadHTML(pageTitle, subtitle) {
+    function doDownloadHTML(pageTitle, subtitle, docId) {
       document.getElementById('downloadTypeOverlay').style.display = 'none';
+      document.getElementById('devChapterForm').style.display = 'none';
+      document.getElementById('devChapterName').value = '';
+      const lsKey = 'rb_progress_' + pageTitle.replace(/\s+/g, '_');
+      const firebaseScripts = docId ? '<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"><\/script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"><\/script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"><\/script>' : '';
+      const authUI = docId ? '<div id="_au" style="display:flex;align-items:center"><button id="loginBtn" onclick="handleLogin()" style="padding:8px 16px;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:16px;height:16px"> Login</button><div id="userProfile" style="display:none;align-items:center;gap:8px"><img id="userAvatar" src="" style="width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,0.5)"><span id="userName" style="font-size:13px;color:#fff;font-weight:600"></span><button onclick="handleLogout()" style="padding:6px 12px;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;font-size:12px;cursor:pointer">Logout</button></div></div>' : '';
+      const progressBlock = docId ? `
+        firebase.apps.length ? firebase.app() : firebase.initializeApp({apiKey:'AIzaSyAPtnjmxKdSYxfNOSgUHpLCCx4aSQb2HNs',authDomain:'revision-bhai.firebaseapp.com',projectId:'revision-bhai',storageBucket:'revision-bhai.firebasestorage.app',messagingSenderId:'458753739993',appId:'1:458753739993:web:5f12045ffa748f050dc2c8'});
+        var _auth = firebase.auth(), _db = firebase.firestore(), _docId = '${docId}', _currentUser = null;
+        _auth.onAuthStateChanged(function(user) {
+          _currentUser = user;
+          if (user) {
+            document.getElementById('loginBtn').style.display = 'none';
+            var up = document.getElementById('userProfile'); up.style.display = 'flex';
+            document.getElementById('userAvatar').src = user.photoURL || '';
+            document.getElementById('userName').textContent = user.displayName || user.email;
+            loadProgress();
+          } else {
+            document.getElementById('loginBtn').style.display = 'flex';
+            document.getElementById('userProfile').style.display = 'none';
+          }
+        });
+        function handleLogin() { _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function() {}); }
+        function handleLogout() { _auth.signOut(); }
+        function saveProgress() {
+          if (!_currentUser) return;
+          var d = {};
+          shapes.filter(function(s) { return s.type === 'notesbox' && s._status; }).forEach(function(s) { d[s.id] = s._status; });
+          _db.collection('users').doc(_currentUser.uid).collection('files').doc(_docId).set(d).catch(function(e) { console.error(e); });
+        }
+        function loadProgress() {
+          if (!_currentUser) return;
+          _db.collection('users').doc(_currentUser.uid).collection('files').doc(_docId).get().then(function(doc) {
+            if (!doc.exists) return;
+            var d = doc.data();
+            shapes.forEach(function(s) {
+              if (s.type === 'notesbox' && d[s.id]) {
+                s._status = d[s.id];
+                var el = document.getElementById(s.id);
+                if (el) { el.classList.toggle('status-done', s._status === 'done'); el.classList.toggle('status-in-progress', s._status === 'in-progress'); }
+              }
+            });
+            updateProgressCounter(); checkProcessShape();
+          }).catch(function(e) { console.error(e); });
+        }
+      ` : `
+        var LS_KEY = '${lsKey}';
+        function saveProgress() {
+          var d = {};
+          shapes.filter(function(s) { return s.type === 'notesbox' && s._status; }).forEach(function(s) { d[s.id] = s._status; });
+          try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch(e) {}
+        }
+        function loadProgress() {
+          try {
+            var raw = localStorage.getItem(LS_KEY);
+            if (!raw) return;
+            var d = JSON.parse(raw);
+            shapes.forEach(function(s) {
+              if (s.type === 'notesbox' && d[s.id]) {
+                s._status = d[s.id];
+                var el = document.getElementById(s.id);
+                if (el) { el.classList.toggle('status-done', s._status === 'done'); el.classList.toggle('status-in-progress', s._status === 'in-progress'); }
+              }
+            });
+            updateProgressCounter(); checkProcessShape();
+          } catch(e) {}
+        }
+      `;
+      const loginGuard = docId ? `if (!_currentUser) {
+          if (!document.getElementById('_lp')) {
+            var a = document.createElement('div'); a.id = '_lp';
+            a.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e293b;border:1px solid rgba(56,189,248,0.3);border-radius:14px;padding:28px 32px;z-index:9999;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.8)';
+            a.innerHTML = '<div style="font-size:16px;color:#f1f5f9;margin-bottom:20px">Please <strong>Login</strong> to save your progress!</div><button onclick="handleLogin();var e=document.getElementById(String.fromCharCode(95,108,112));if(e)e.remove()" style="padding:10px 24px;background:linear-gradient(135deg,#0ea5e9,#8b5cf6);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-right:8px">Sign In</button><button onclick="var e=document.getElementById(String.fromCharCode(95,108,112));if(e)e.remove()" style="padding:10px 24px;background:rgba(30,41,59,0.7);color:#c4cdd9;border:1px solid rgba(56,189,248,0.2);border-radius:8px;font-size:14px;cursor:pointer">Cancel</button>';
+            document.body.appendChild(a);
+          }
+          return;
+        }` : '';
+      const resetConfirm = docId ? `if (!confirm('Reset all progress? This will delete your saved data from the server.')) return;` : '';
+      const resetStorage = docId ? `if (_currentUser) { _db.collection('users').doc(_currentUser.uid).collection('files').doc(_docId).delete().catch(function() {}); }` : `try { localStorage.removeItem(LS_KEY); } catch(e) {}`;
       const payload = {
         version: 1,
         exportedAt: new Date().toISOString(),
@@ -1679,6 +1876,12 @@
     .shape-notesbox .nb-notes{padding:10px 14px 14px;display:flex;flex-direction:column;gap:6px;background:rgba(243,232,255,.6)}
     .shape-notesbox.collapsed .nb-notes{display:none}
     .shape-notesbox.md-active-box .nb-toggle{display:none}
+    .shape-notesbox.md-inline-box .nb-toggle{display:none}
+    .shape-notesbox.has-box-url{cursor:pointer;transition:all .2s}
+    .shape-notesbox.has-box-url:hover{border-color:#10b981 !important;box-shadow:0 0 0 3px rgba(16,185,129,0.2),0 4px 16px rgba(16,185,129,0.15) !important;transform:translateY(-1px)}
+    .shape-notesbox.has-box-url .nb-toggle{display:none}
+    .shape-notesbox.has-box-url .nb-status-bar{display:none}
+    .shape-notesbox.has-box-url .nb-progress-btns-inline{display:none}
     .shape-notesbox.status-done{border-color:#10b981 !important;background:linear-gradient(135deg,rgba(209,250,229,0.7) 0%,rgba(167,243,208,0.5) 100%) !important}
     .shape-notesbox.status-in-progress{border-color:#f59e0b !important;background:linear-gradient(135deg,rgba(254,243,199,0.7) 0%,rgba(253,230,138,0.5) 100%) !important}
     .progress-counter{display:none}
@@ -1729,6 +1932,7 @@
     .md-fullscreen-body{flex:1;overflow-y:auto;padding:20px}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"><\/script>
+    ${firebaseScripts}
     </head>
     <body>
       <div class="viewer-header" style="${subtitle ? 'height:72px;min-height:72px;padding:0 20px' : 'height:68px;min-height:68px;padding:0 16px'}">
@@ -1739,9 +1943,10 @@
             ${subtitle ? '<div style="font-size:14px;color:rgba(224,231,255,.7);margin-top:5px">' + subtitle + '</div>' : ''}
           </div>
         </div>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px;align-items:center">
           <button onclick="expandAll()" style="padding:5px 12px;background:rgba(79,70,229,0.15);border:1px solid rgba(79,70,229,0.4);border-radius:6px;color:#818cf8;font-size:16px;font-weight:600;cursor:pointer">Expand All</button>
           <button onclick="collapseAll()" style="padding:5px 12px;background:rgba(79,70,229,0.1);border:1px solid rgba(79,70,229,0.3);border-radius:6px;color:#818cf8;font-size:16px;font-weight:600;cursor:pointer">Collapse All</button>
+          ${authUI}
         </div>
       </div>
       <div class="main">
@@ -1895,28 +2100,7 @@
           });
           setTimeout(function(){ updateAllSnappedLines(); drawConnections(); }, 50);
         };
-        var LS_KEY = 'rb_progress_${pageTitle.replace(/\s+/g, "_")}';
-        function saveProgress(){
-          var data = {};
-          shapes.filter(function(s){ return s.type==='notesbox' && s._status; }).forEach(function(s){ data[s.id] = s._status; });
-          try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch(e){}
-        }
-        function loadProgress(){
-          try {
-            var raw = localStorage.getItem(LS_KEY);
-            if (!raw) return;
-            var data = JSON.parse(raw);
-            shapes.forEach(function(s){
-              if (s.type==='notesbox' && data[s.id]) {
-                s._status = data[s.id];
-                var el = document.getElementById(s.id);
-                if (el) { el.classList.toggle('status-done', s._status==='done'); el.classList.toggle('status-in-progress', s._status==='in-progress'); }
-              }
-            });
-            updateProgressCounter();
-            checkProcessShape();
-          } catch(e){}
-        }
+        ${progressBlock}
         function updateProgressCounter(){
           var done = shapes.filter(function(s){ return s.type==='notesbox' && s._status==='done'; }).length;
           var prog = shapes.filter(function(s){ return s.type==='notesbox' && s._status==='in-progress'; }).length;
@@ -1931,6 +2115,7 @@
           setTimeout(function(){ counter.classList.remove('pulse'); }, 500);
         }
         window.setBoxStatus = function(s, el, status){
+          ${loginGuard}
           if (s._status === status) return;
           s._status = status;
           el.classList.toggle('status-done', status === 'done');
@@ -1976,6 +2161,7 @@
           procEl.classList.toggle('status-done', allDone);
         }
         window.resetProgress = function(){
+          ${resetConfirm}
           shapes.forEach(function(s){
             if (s.type==='notesbox') {
               s._status = null;
@@ -1988,12 +2174,15 @@
           });
           updateProgressCounter();
           checkProcessShape();
-          try { localStorage.removeItem(LS_KEY); } catch(e){}
+          ${resetStorage}
         };
         function renderNotesBox(s, el){
           el.style.height = 'auto';
           el.classList.toggle('collapsed', !s.notesExpanded);
           el.classList.toggle('md-active-box', !!s.mdMode);
+          el.classList.toggle('md-inline-box', !!(s.mdMode && s.mdInline));
+          el.classList.toggle('has-box-url', !!s.boxUrl);
+          if (s.boxUrl) { el.addEventListener('click', function(ev){ ev.stopPropagation(); window.open(s.boxUrl, '_blank'); }); }
           var header = document.createElement('div');
           header.className = 'nb-header';
           var label = document.createElement('div');
@@ -2043,7 +2232,9 @@
           el.appendChild(header);
           var notesDiv = document.createElement('div');
           notesDiv.className = 'nb-notes';
-          if (!hasContent || s.mdMode) {
+          if (s.mdMode && s.mdInline && hasContent) {
+            notesDiv.innerHTML = renderMarkdown(s.mdContent);
+          } else if (!hasContent || s.mdMode) {
             notesDiv.style.display = 'none';
           } else {
             if (!s.notes || s.notes.length === 0) s.notes = [{text:''}];
@@ -2219,7 +2410,7 @@
           el.classList.toggle('note-linked', linked);
           el.classList.remove('note-visible');
         });
-        loadProgress();
+        if (!${!!docId}) { loadProgress(); }
         setTimeout(function(){
           expandCanvasToFit();
           drawConnections();
@@ -2620,13 +2811,17 @@ Core Idea:
 </div>
 
 <!-- Download type modal -->
-<div id="downloadTypeOverlay" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.6);backdrop-filter:blur(8px);align-items:center;justify-content:center">
+<div id="downloadTypeOverlay" onclick="if(event.target===this){this.style.display='none';document.getElementById('devChapterForm').style.display='none';document.getElementById('devChapterName').value='';}" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.6);backdrop-filter:blur(8px);align-items:center;justify-content:center">
     <div style="background:#1e293b;border:1px solid rgba(79,70,229,0.3);border-radius:14px;padding:32px 40px;text-align:center;box-shadow:0 12px 40px rgba(15,23,42,0.4)">
         <div style="font-size:15px;font-weight:600;color:#f1f5f9;margin-bottom:8px">Choose Download Option</div>
         <div style="font-size:12px;color:rgba(148,163,184,0.7);margin-bottom:24px">Select the type for your HTML file</div>
         <div style="display:flex;gap:12px;justify-content:center">
-            <button onclick="doDownloadHTML('Revision Bhai FlowChat Notes', 'We don\'t motivate — we teach')" style="padding:10px 28px;background:rgba(79,70,229,0.15);border:1px solid rgba(79,70,229,0.4);border-radius:8px;color:#818cf8;font-size:13px;font-weight:600;cursor:pointer">Social</button>
-            <button onclick="doDownloadHTML('Dev Notes', '')" style="padding:10px 28px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#34d399;font-size:13px;font-weight:600;cursor:pointer">Dev</button>
+            <button onclick="doDownloadHTML('Revision Bhai', 'We don\'t motivate — we teach')" style="padding:10px 28px;background:rgba(79,70,229,0.15);border:1px solid rgba(79,70,229,0.4);border-radius:8px;color:#818cf8;font-size:13px;font-weight:600;cursor:pointer">Social</button>
+            <button onclick="document.getElementById('devChapterForm').style.display='block'" style="padding:10px 28px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#34d399;font-size:13px;font-weight:600;cursor:pointer">Dev</button>
+        </div>
+        <div id="devChapterForm" style="display:none;margin-top:20px">
+            <input id="devChapterName" type="text" placeholder="Enter chapter name (e.g. history-chap1)" style="width:100%;padding:8px 12px;background:rgba(15,23,42,0.8);border:1px solid rgba(16,185,129,0.4);border-radius:8px;color:#f1f5f9;font-size:13px;outline:none;margin-bottom:10px">
+            <button onclick="var n=document.getElementById('devChapterName').value.trim();if(!n){alert('Enter chapter name');return;}doDownloadHTML('Dev Notes','',n+'-'+Date.now())" style="width:100%;padding:8px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);border-radius:8px;color:#34d399;font-size:13px;font-weight:600;cursor:pointer">Download Dev</button>
         </div>
     </div>
 </div>
